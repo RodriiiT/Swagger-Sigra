@@ -122,12 +122,19 @@
           }
 
           const storedPassword = user.password_hash || ''
-          if (password === storedPassword) {
-            window.location.href = './user-table.html'
-            return
-          }
+                  const roleId = Number(user.role_id)
 
-          setError(passwordError, 'Contraseña incorrecta')
+                  if (password === storedPassword && roleId === 1) {
+                    window.location.href = './user-table.html'
+                    return
+                  }
+
+                  if (password === storedPassword && roleId !== 1) {
+                    setError(passwordError, 'No tienes módulo todavía')
+                    return
+                  }
+
+                  setError(passwordError, 'Contraseña incorrecta')
         } catch (error) {
           setError(emailError, 'No se pudo conectar con el servidor')
           console.error('Login error:', error)

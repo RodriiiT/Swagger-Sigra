@@ -1,7 +1,7 @@
 :root {
-  --bg-page: #f5f6f8;
+  --bg-page: #e5e7eb;
   --bg-surface: #ffffff;
-  --border: #e5e7eb;
+  --border: #cbd5e1;
   --text: #1f2937;
   --muted: #6b7280;
   --link: #2563eb;
@@ -25,7 +25,7 @@ body {
 
 header {
   background: var(--bg-surface);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 2px solid var(--border);
 }
 
 .navbar {
@@ -192,7 +192,7 @@ h1 {
 
 .table-card {
   background: var(--bg-surface);
-  border: 1px solid #d5d9e5;
+  border: 2px solid var(--border);
   border-radius: 14px;
   overflow: hidden;
   box-shadow: 0 8px 22px rgba(17, 24, 39, 0.06);
@@ -207,7 +207,7 @@ table {
   border-collapse: separate;
   border-spacing: 0;
   min-width: 720px;
-  border: 1px solid #d5d9e5;
+  border: 2px solid var(--border);
 }
 
 thead {
@@ -219,8 +219,8 @@ td {
   text-align: left;
   padding: 14px 18px;
   font-size: 0.96rem;
-  border-bottom: 1px solid #d5d9e5;
-  border-right: 1px solid #e5e7eb;
+  border-bottom: 2px solid var(--border);
+  border-right: 2px solid var(--border);
 }
 
 th {
@@ -250,12 +250,12 @@ tbody tr:last-child td {
 }
 
 .badge.active {
-  background: var(--badge);
-  color: var(--text);
+  background: #e0e7ff;
+  color: #1d4ed8;
 }
 
 .badge.inactive {
-  background: var(--badge-muted);
+  background: var(--badge);
   color: var(--muted);
 }
 
