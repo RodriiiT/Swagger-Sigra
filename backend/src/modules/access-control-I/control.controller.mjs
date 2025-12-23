@@ -1,4 +1,4 @@
-import { getUser as getUserModel, getUserByName as getUserByNameModel, getUserByEmail as getUserByEmailModel } from './control.model.mjs'
+import { getUser as getUserModel, getUserByName as getUserByNameModel, getUserByEmail as getUserByEmailModel, getRoleById as getRoleByIdModel } from './control.model.mjs'
 
 export async function getUser(req, res) {
 	try {
@@ -89,5 +89,32 @@ export async function getUserByEmail(req, res) {
 	}
 }
 
-export default { getUser, getUserByName, getUserByEmail }
+export async function getRoleById(req, res) {
+	try {
+		const { id } = req.params
+		const roleId = Number(id)
+		if (!roleId || Number.isNaN(roleId)) {
+			return res.status(400).json({ message: 'Invalid role id' })
+		}
+
+		const role = await getRoleByIdModel(roleId)
+		if (!role) return res.status(404).json({ message: 'Role not found' })
+
+		const result = {
+			id: role.role_id,
+			name: role.name,
+			description: role.description,
+			is_active: Boolean(role.is_active),
+			created_at: role.created_at,
+			updated_at: role.updated_at
+		}
+
+		return res.status(200).json(result)
+	} catch (error) {
+		console.error('getRoleById controller error:', error)
+		return res.status(500).json({ message: 'Internal server error' })
+	}
+}
+
+export default { getUser, getUserByName, getUserByEmail, getRoleById }
 

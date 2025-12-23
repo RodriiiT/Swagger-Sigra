@@ -46,4 +46,19 @@ export function validateGetUserEmail(req, res, next) {
   return next()
 }
 
+// Esquema para validar params de GET /roles/:id
+export const getRoleParamsSchema = z.object({
+  id: z.coerce.number().int().positive()
+})
+
+export function validateGetRole(req, res, next) {
+  const result = getRoleParamsSchema.safeParse(req.params)
+  if (!result.success) {
+    return res.status(400).json({ message: 'Invalid parameters', errors: result.error.errors })
+  }
+
+  req.params.id = result.data.id
+  return next()
+}
+
 export default { getUserParamsSchema, validateGetUser }

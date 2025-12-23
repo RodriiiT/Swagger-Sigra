@@ -37,5 +37,17 @@ export async function getUserByEmail(email) {
     }
 }
 
-export default { getUser, getUserByName, getUserByEmail }
+export async function getRoleById(roleId) {
+	if (!roleId) return null
+	const query = `SELECT role_id, name, description, is_active, created_at, updated_at FROM roles WHERE role_id = ? LIMIT 1`;
+	try {
+		const [rows] = await db.execute(query, [roleId]);
+		if (!rows || rows.length === 0) return null
+		return rows[0]
+	} catch (error) {
+		throw error
+	}
+}
+
+export default { getUser, getUserByName, getUserByEmail, getRoleById }
 

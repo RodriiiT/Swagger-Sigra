@@ -1,6 +1,6 @@
 import express from 'express'
-import { getUser, getUserByName, getUserByEmail } from './control.controller.mjs'
-import { validateGetUser, validateGetUserName, validateGetUserEmail } from './control.schema.mjs'
+import { getUser, getUserByName, getUserByEmail, getRoleById } from './control.controller.mjs'
+import { validateGetUser, validateGetUserName, validateGetUserEmail, validateGetRole } from './control.schema.mjs'
 
 const router = express.Router()
 
@@ -12,6 +12,9 @@ router.get('/users/name/:name', validateGetUserName, getUserByName)
 
 // GET /users/email/:email -> devuelve usuario por email
 router.get('/users/email/:email', validateGetUserEmail, getUserByEmail)
+
+// GET /roles/:id -> devuelve rol por role_id
+router.get('/roles/:id', validateGetRole, getRoleById)
 
 export default router
 
