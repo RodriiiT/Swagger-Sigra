@@ -27,4 +27,4 @@ router.delete(
 	ctrlDesasignarMateriaDeGrado
 );
 
-export default router;
+export const managementRoutes = router;
