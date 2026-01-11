@@ -8,6 +8,7 @@ import { prelaciesRoute } from "../../modules/academic-structure-II/prelacies/pr
 import { SectionRoutes } from "../../modules/academic-structure-II/sections/section.route.mjs";
 import { GradeRoutes } from "../../modules/academic-structure-II/grades/grade.route.mjs";
 import { YearRoutes } from "../../modules/academic-structure-II/years/year.route.mjs";
+import { NotificationRoutes } from "../../modules/notifications-VII/notification.route.mjs";
 import { AssignmentRouter } from "../../modules/academic-manager-III/assignments/assignment.route.mjs";
 import { SchedulesRoutes } from "../../modules/academic-manager-III/schedules/schedules.route.mjs";
 
@@ -29,6 +30,10 @@ export const ListRoutes = {
         grades: router.use(`${SETTINGS.BASE_PATH}/grades-log`, GradesLogRoutes),
         records: router.use(`${SETTINGS.BASE_PATH}/records`, RecordsRoutes)
     },
+    notifications: {
+        notifications: router.use(`${SETTINGS.BASE_PATH}/notifications`, NotificationRoutes)
+    }
+}
     academicManager: {
         assignments: router.use(`${SETTINGS.BASE_PATH}/assignments`, AssignmentRouter),
         schedules: router.use(`${SETTINGS.BASE_PATH}/schedules`, SchedulesRoutes)
