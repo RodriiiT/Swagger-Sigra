@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIGRA - Gestión de Prelaciones</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <!-- Inline favicon to avoid browser requesting /favicon.ico (prevents 404 in console) -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext x='1' y='13' font-size='12'%3E%C2%A9%3C/text%3E%3C/svg%3E">
+</head>
+
+<body>
+
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">
+                <img src="Adobe Express - file.png" alt="Colegio Monte del Mar" class="logo-img">
+                <span class="logo-text">SIGRA</span>
+            </div>
+            <nav class="nav-links">
+                <a href="#">Inicio</a>
+                <a href="#" class="active">Asignaturas</a>
+                <a href="#">Docentes</a>
+                <a href="#">Reportes</a>
+            </nav>
+        </div>
+        <div class="header-right">
+            <div class="search-bar">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="Buscar...">
+            </div>
+            <div class="notifications">
+                <i class="fa-solid fa-bell"></i>
+                <span class="dot"></span>
+            </div>
+            <div class="profile">
+                <img src="https://i.pravatar.cc/150?img=11" alt="Profile">
+            </div>
+        </div>
+    </header>
+
+    <div class="page-header container">
+        <div class="breadcrumbs">
+            <i class="fa-solid fa-house"></i> Inicio <span></span> Asignaturas <span></span> <span
+                class="current">Prelaciones</span>
+        </div>
+        <h1>Gestión de Prelaciones</h1>
+        <p class="subtitle">Defina y actualice los requisitos académicos previos para cada asignatura. Las prelaciones
+            aseguran que los estudiantes sigan el orden lógico del plan de estudios.</p>
+    </div>
+
+    <main class="container main-grid">
+
+        <section class="card config-section">
+            <div class="card-header">
+                <h3><i class="fa-solid fa-bars-staggered"></i> Configurar Requisitos</h3>
+            </div>
+            <div class="card-body">
+
+                <div class="form-group">
+                    <label>1. Seleccionar Materia Principal</label>
+                    <div class="search-input-group">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="materia-search"
+                            placeholder="Buscar por código o nombre (ej. MAT-204, Matematica I)" list="materias-list">
+                        <datalist id="materias-list">
+                            <!-- Se llenará dinámicamente desde la base de datos -->
+                        </datalist>
+                    </div>
+
+                    <div class="selected-item" id="selected-materia-container" style="display: none;">
+                        <div class="selected-info">
+                            <span class="materia-tag">MATERIA SELECCIONADA</span>
+                            <h4 id="selected-materia-title">MAT-206 — Matemática II</h4>
+                            <p id="selected-materia-year">2do Año</p>
+                        </div>
+                        <button class="close-btn" id="clear-materia-btn"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>2. Asignar Materias Prerrequisito</label>
+                    <div class="dropdown-action">
+                        <select class="form-select" id="prereq-select">
+                            <option>Seleccione una asignatura...</option>
+                            <!-- Se llenará dinámicamente con las materias disponibles -->
+                        </select>
+                        <button class="btn btn-primary-dark" id="add-prereq-btn"><i class="fa-solid fa-plus"></i>
+                            Añadir</button>
+                    </div>
+                    <div id="prereq-message" class="inline-message" aria-live="polite" style="display:none"></div>
+                </div>
+
+                <div class="prerequisites-list" id="prereq-list">
+                    <!-- Lista dinámica de prerrequisitos para la materia seleccionada -->
+                </div>
+            </div>
+
+            <div class="card-footer">
+                <button class="btn btn-outline" id="cancel-config-btn">Cancelar</button>
+                <button class="btn btn-primary" id="save-btn">
+                    <i class="fa-solid fa-floppy-disk"></i> Guardar Prelaciones
+                </button>
+            </div>
+        </section>
+
+        <aside class="sidebar">
+            <div class="info-box">
+                <div class="info-title">
+                    <i class="fa-solid fa-circle-info"></i> Información
+                </div>
+                <p>Al definir una prelación, el sistema bloqueará la inscripción de la materia principal hasta que el
+                    estudiante haya aprobado todas las materias asignadas como requisitos.</p>
+                <ul>
+                    <li>Evite crear ciclos infinitos (A requiere B, B requiere A).</li>
+                    <li>Puede asignar múltiples materias como requisito.</li>
+                </ul>
+            </div>
+
+                <div class="card recent-activity">
+                <div class="card-header-flex">
+                    <h4>Prelaciones Recientes</h4>
+                    <a href="#" id="view-all-prelaciones">Ver todas</a>
+                </div>
+                <div class="activity-list" id="recent-prelaciones">
+                    <!-- Se cargará dinámicamente desde la base de datos (subject_prerequisites) -->
+                </div>
+            </div>
+        </aside>
+
+        <section class="card table-section full-width">
+            <div class="table-header-tools">
+                <h3>Resumen de Prelaciones - SIGRA</h3>
+                <!-- Filter/Export removed as requested -->
+                <div class="tools" aria-hidden="true"></div>
+            </div>
+
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>CÓDIGO</th>
+                        <th>MATERIA PRINCIPAL</th>
+                        <th>PRERREQUISITOS ACTIVOS</th>
+                        <th>ACCIONES</th>
+                    </tr>
+                </thead>
+                <tbody id="summary-body">
+                    <!-- Tabla de resumen renderizada desde la base de datos -->
+                </tbody>
+            </table>
+
+            <div class="table-footer">
+                <span id="summary-range">Mostrando 0 a 0 de 0 resultados</span>
+                <div class="pagination">
+                    <button class="page-btn" id="summary-prev">Anterior</button>
+                    <span class="pagination-separator">—</span>
+                    <button class="page-btn" id="summary-next">Siguiente</button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="delete-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-triangle-exclamation"></i> Confirmar Eliminación</h3>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message">¿Estás seguro de que deseas eliminar esta configuración de prelación?</p>
+            </div>
+            <div class="modal-footer">
+                <button id="cancel-delete" class="btn btn-outline">Cancelar</button>
+                <button id="confirm-delete" class="btn btn-danger">
+                    <i class="fa-solid fa-trash-can"></i> Eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para "Ver todas" las Prelaciones Recientes -->
+    <div id="prelaciones-modal" class="modal-overlay">
+        <div class="modal-card prelaciones-modal">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-clock-rotate-left"></i> Todas las Prelaciones Recientes</h3>
+                <button class="close-modal-btn" id="close-prelaciones-modal">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="prelaciones-container" id="prelaciones-list">
+                    <!-- Las prelaciones se cargarán dinámicamente aquí -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

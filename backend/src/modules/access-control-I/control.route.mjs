@@ -1,37 +1,29 @@
-import express from 'express'
-import { getUser, getUserByName, getUserByEmail, getUserRole, getAllUsers, registerUser, loginUser, updateUser, deleteUser } from './control.controller.mjs'
-import { validateGetUser, validateGetUserName, validateGetUserEmail, validateGetRole, validateUpdateUser } from './control.schema.mjs'
+import { Router } from 'express';
+import { ControlController } from './control.controller.mjs';
+import { UserModel } from './control.model.mjs';
+import { authMiddleware } from '../../api/middlewares/auth.middleware.mjs';
 
-const router = express.Router()
+const router = Router();
+const controller = new ControlController({ ModelControl: UserModel });
 
-// GET /users -> devuelve lista de usuarios (first_name, role_id, last_name, mail, is_active)
-router.get('/users', getAllUsers)
+// Ruta para obtener todos los usuarios
+router.get('/users', controller.getAllUsers);
+// Ruta para obtener un usuario por su ID
+router.get('/user/:userId', controller.getUserById);
+// Ruta para obtener un usuario por su email
+router.get('/email/:email', controller.getUserByEmail);
+// Ruta para crear un nuevo usuario
+router.post('/register', controller.createdUser);
+// Ruta para loguear un usuario
+router.post('/login', controller.LoginUser);
+// Ruta para logout de un usuario
+router.post('/logout/:userId', controller.LogoutUser);
+// Ruta para actualizar un usuario
+router.patch('/update/:userId', controller.updateUser);
+// Ruta para eliminar un usuario
+router.delete('/delete/:userId', controller.deleteUser);
+// Ruta para verificar si el usuario está autenticado
+router.get('/verify-auth', authMiddleware, controller.verifyAuth);
 
-// POST /users/login -> login por email + password
-router.post('/users/login', loginUser)
-
-// POST /users -> registrar usuario
-router.post('/users', registerUser)
-
-// PUT /users/:id -> actualizar usuario (rol, estado, etc)
-router.put('/users/:id', validateGetUser, validateUpdateUser, updateUser)
-
-// DELETE /users/:id -> eliminar usuario
-router.delete('/users/:id', validateGetUser, deleteUser)
-
-// GET /users/:id  -> devuelve usuario por user_id
-router.get('/users/:id', validateGetUser, getUser)
-
-// GET /users/name/:name -> devuelve usuario buscando por nombre (first_name o last_name)
-router.get('/users/name/:name', validateGetUserName, getUserByName)
-
-// GET /users/email/:email -> devuelve usuario por email
-router.get('/users/email/:email', validateGetUserEmail, getUserByEmail)
-
-// GET /roles/:id -> (removed) previously returned role by role_id
-
-// GET /users/:id/role -> devuelve { role_id, first_name } por user_id
-router.get('/users/:id/role', validateGetUser, getUserRole)
-
-export default router
+export const controlRoute = router;
 

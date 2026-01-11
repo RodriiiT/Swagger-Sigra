@@ -31,18 +31,27 @@ CREATE TABLE users (
 );
 
 -- Tabla para Recuperación de Contraseñas
-CREATE TABLE password_resets (
+CREATE TABLE login_session (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    token VARCHAR(255) NOT NULL,
-    expires_at DATETIME NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    token VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
 -- ==========================================
 -- MODULO 2: ESTRUCTURA ACADÉMICA (CEREBRO)
 -- ==========================================
+
+CREATE TABLE subject_prerequisites(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    subject_id INT,
+    subject_prerequisites_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (subject_id) REFERENCES subjects(subject_id) ON DELETE CASCADE
+);
 
 -- Años Académicos / Periodos (Ej: 2024-2025)
 CREATE TABLE academic_years (
@@ -76,6 +85,8 @@ CREATE TABLE subjects (
     subject_id INT AUTO_INCREMENT PRIMARY KEY,
     grade_id INT NOT NULL, -- Pertenece a la malla de un año específico
     subject_name VARCHAR(100) NOT NULL, -- "Matemáticas", "Historia"
+    code_subject VARCHAR(140) NOT NULL,
+    is_active BOOLEAN DEFAULT(TRUE), 
     description TEXT,
     FOREIGN KEY (grade_id) REFERENCES grades(grade_id)
 );
