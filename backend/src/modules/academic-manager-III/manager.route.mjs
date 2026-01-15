@@ -14,4 +14,7 @@ router.post('/courses', courseController.createCourse)
 // ===== RUTAS DE HORARIOS =====
 router.get('/schedule/:studentId', courseController.getScheduleByStudent)
 
+// ===== RUTAS DE RESUMEN ACADÉMICO (BFF) =====
+router.get('/student/:studentId/summary', courseController.getStudentAcademicSummary)
+
 export const managerRoutes = router
