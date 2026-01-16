@@ -68,6 +68,7 @@ CREATE TABLE sections (
     academic_year_id INT NOT NULL,
     section_name VARCHAR(5) NOT NULL, -- "A", "B", "C"
     capacity INT DEFAULT 20, -- Cupos máximos
+    number_of_students INT DEFAULT 0, -- Cantidad actual de estudiantes inscritos
     FOREIGN KEY (grade_id) REFERENCES grades(grade_id) ON DELETE CASCADE,
     FOREIGN KEY (academic_year_id) REFERENCES academic_years(year_id) ON DELETE CASCADE
 );

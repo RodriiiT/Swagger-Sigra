@@ -14,6 +14,8 @@ app.use(cors());
 app.use(json());
 app.use(morgan("dev"));
 
+app.use('/uploads', express.static('uploads'));
+
 // Rutas
 app.get("/", (req, res) => {
 	res.send("Servidor funcionando correctamente");
