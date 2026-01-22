@@ -1,6 +1,10 @@
 /* --- ARCHIVO: config/swagger.config.mjs --- */
 import swaggerJsdoc from 'swagger-jsdoc';
 
+// Detectamos la URL del servidor: si existe la variable de entorno la usamos, 
+// de lo contrario usamos localhost por defecto.
+const serverUrl = process.env.SERVER_URL || 'http://localhost:3000';
+
 const options = {
   definition: {
     openapi: '3.0.0',
@@ -11,9 +15,8 @@ const options = {
     },
     servers: [
       { 
-        // Agregamos una variable de entorno para la URL de producción
-        url: process.env.SERVER_URL || 'http://localhost:3000', 
-        description: 'Servidor Actual' 
+        url: serverUrl, 
+        description: 'Servidor de la API' 
       }
     ],
     components: {
@@ -22,6 +25,7 @@ const options = {
       }
     }
   },
+  // Importante: asegúrate de que la ruta a los módulos sea correcta
   apis: ['./src/modules/**/*.mjs'], 
 };
 
