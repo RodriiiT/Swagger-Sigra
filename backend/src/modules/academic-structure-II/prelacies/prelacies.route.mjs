@@ -5,32 +5,153 @@ import { PrelaciesController } from './prelacies.controller.mjs';
 const router = Router();
 const controller = new PrelaciesController({ ModelPrelacy: ModelPrelacy });
 
-// Base route - get all subjects (frontend calls GET /api/prelacies)
-router.get('/', controller.getAllSubjects);
+/**
+ * @openapi
+ * tags:
+ *   name: Módulo II - Prelacies
+ *   description: Configuración de prerequisitos entre materias
+ */
 
-// Search subjects by query (frontend calls GET /api/prelacies/search?q=...)
-router.get('/search', controller.searchSubjects);
-
-// Get summary of all prelacies grouped by subject
-router.get('/summary', controller.getSummary);
-
-// Get all prelacies
+/**
+ * @openapi
+ * /api/prelacies/all:
+ *   get:
+ *     tags: [Módulo II - Prelacies]
+ *     summary: Obtener todas las prelaciones definidas
+ *     responses:
+ *       200:
+ *         description: Lista de prelaciones
+ */
 router.get('/all', controller.getAllPrelacies);
 
-// Get subject's prerequisites (frontend calls GET /api/prelacies/:subjectId/prerequisites)
+/**
+ * @openapi
+ * /api/prelacies/{subjectId}/prerequisites:
+ *   get:
+ *     tags: [Módulo II - Prelacies]
+ *     summary: Obtener materias que bloquean a una materia específica
+ *     parameters:
+ *       - in: path
+ *         name: subjectId
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Lista de prerequisitos encontrada
+ */
 router.get('/:subjectId/prerequisites', controller.getPrelaciesBySubjectId);
 
-// Get subject by ID
+/**
+ * @openapi
+ * /api/prelacies:
+ *   get:
+ *     tags: [Módulo II - Prelacies]
+ *     summary: Obtener todas las materias disponibles para prelación
+ *     responses:
+ *       200:
+ *         description: Lista de materias
+ */
+router.get('/', controller.getAllSubjects);
+
+/**
+ * @openapi
+ * /api/prelacies/search:
+ *   get:
+ *     tags: [Módulo II - Prelacies]
+ *     summary: Buscar materias por nombre
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         schema: { type: string }
+ *         description: Término de búsqueda
+ *     responses:
+ *       200:
+ *         description: Resultados de búsqueda
+ */
+router.get('/search', controller.searchSubjects);
+
+/**
+ * @openapi
+ * /api/prelacies/summary:
+ *   get:
+ *     tags: [Módulo II - Prelacies]
+ *     summary: Resumen agrupado de todas las prelaciones
+ *     responses:
+ *       200:
+ *         description: Resumen obtenido
+ */
+router.get('/summary', controller.getSummary);
+
+/**
+ * @openapi
+ * /api/prelacies/subjects/{subjectId}:
+ *   get:
+ *     tags: [Módulo II - Prelacies]
+ *     summary: Obtener materia por ID para prelación
+ *     parameters:
+ *       - in: path
+ *         name: subjectId
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Materia obtenida
+ */
 router.get('/subjects/:subjectId', controller.getSubjectById);
 
-// Create a prelacy (frontend calls POST /api/prelacies - not /create)
+/**
+ * @openapi
+ * /api/prelacies:
+ *   post:
+ *     tags: [Módulo II - Prelacies]
+ *     summary: Crear una nueva relación de prelación
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               subject_id: { type: integer }
+ *               prerequisite_id: { type: integer }
+ *     responses:
+ *       201:
+ *         description: Prelación creada
+ */
 router.post('/', controller.createPrelacy);
 
-// Delete all prerequisites for a subject (frontend calls DELETE /api/prelacies/subject/:subjectId)
+/**
+ * @openapi
+ * /api/prelacies/subject/{subjectId}:
+ *   delete:
+ *     tags: [Módulo II - Prelacies]
+ *     summary: Eliminar todas las prelaciones de una materia
+ *     parameters:
+ *       - in: path
+ *         name: subjectId
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Prelaciones eliminadas
+ */
 router.delete('/subject/:subjectId', controller.deletePrelaciesBySubject);
 
-// Delete a specific prelacy (frontend calls DELETE /api/prelacies/:prelacyId)
+/**
+ * @openapi
+ * /api/prelacies/{prelacyId}:
+ *   delete:
+ *     tags: [Módulo II - Prelacies]
+ *     summary: Eliminar una prelación específica
+ *     parameters:
+ *       - in: path
+ *         name: prelacyId
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Registro eliminado
+ */
 router.delete('/:prelacyId', controller.deletePrelacy);
 
 export const prelaciesRoute = router;
-

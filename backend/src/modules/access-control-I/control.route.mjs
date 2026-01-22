@@ -6,24 +6,168 @@ import { authMiddleware } from '../../api/middlewares/auth.middleware.mjs';
 const router = Router();
 const controller = new ControlController({ ModelControl: UserModel });
 
-// Ruta para obtener todos los usuarios
+/**
+ * @openapi
+ * tags:
+ *   name: Módulo I - Auth & Users
+ *   description: Gestión de usuarios, sesiones y autenticación
+ */
+
+/**
+ * @openapi
+ * /api/auth/users:
+ *   get:
+ *     tags: [Módulo I - Auth & Users]
+ *     summary: Obtener todos los usuarios registrados
+ *     responses:
+ *       200:
+ *         description: Lista de usuarios
+ */
 router.get('/users', controller.getAllUsers);
-// Ruta para obtener un usuario por su ID
+
+/**
+ * @openapi
+ * /api/auth/user/{userId}:
+ *   get:
+ *     tags: [Módulo I - Auth & Users]
+ *     summary: Obtener un usuario por ID
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Datos del usuario obtenidos
+ */
 router.get('/user/:userId', controller.getUserById);
-// Ruta para obtener un usuario por su email
+
+/**
+ * @openapi
+ * /api/auth/email/{email}:
+ *   get:
+ *     tags: [Módulo I - Auth & Users]
+ *     summary: Buscar un usuario por email
+ *     parameters:
+ *       - in: path
+ *         name: email
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Usuario encontrado
+ */
 router.get('/email/:email', controller.getUserByEmail);
-// Ruta para crear un nuevo usuario
+
+/**
+ * @openapi
+ * /api/auth/register:
+ *   post:
+ *     tags: [Módulo I - Auth & Users]
+ *     summary: Registrar un nuevo usuario
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               role_id: { type: integer }
+ *               first_name: { type: string }
+ *               last_name: { type: string }
+ *               email: { type: string }
+ *               phone: { type: string }
+ *               password_hash: { type: string }
+ *     responses:
+ *       201:
+ *         description: Usuario creado con éxito
+ */
 router.post('/register', controller.createdUser);
-// Ruta para loguear un usuario
+
+/**
+ * @openapi
+ * /api/auth/login:
+ *   post:
+ *     tags: [Módulo I - Auth & Users]
+ *     summary: Iniciar sesión
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email: { type: string }
+ *               password_hash: { type: string }
+ *     responses:
+ *       200:
+ *         description: Login exitoso, devuelve token
+ */
 router.post('/login', controller.LoginUser);
-// Ruta para logout de un usuario
+
+/**
+ * @openapi
+ * /api/auth/logout/{userId}:
+ *   post:
+ *     tags: [Módulo I - Auth & Users]
+ *     summary: Cerrar sesión de un usuario
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Sesión cerrada
+ */
 router.post('/logout/:userId', controller.LogoutUser);
-// Ruta para actualizar un usuario
+
+/**
+ * @openapi
+ * /api/auth/update/{userId}:
+ *   patch:
+ *     tags: [Módulo I - Auth & Users]
+ *     summary: Actualizar datos de un usuario
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Usuario actualizado
+ */
 router.patch('/update/:userId', controller.updateUser);
-// Ruta para eliminar un usuario
+
+/**
+ * @openapi
+ * /api/auth/delete/{userId}:
+ *   delete:
+ *     tags: [Módulo I - Auth & Users]
+ *     summary: Eliminar un usuario
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Usuario eliminado
+ */
 router.delete('/delete/:userId', controller.deleteUser);
-// Ruta para verificar si el usuario está autenticado
+
+/**
+ * @openapi
+ * /api/auth/verify-auth:
+ *   get:
+ *     tags: [Módulo I - Auth & Users]
+ *     summary: Verificar ticket de sesión (JWT)
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Autenticado
+ */
 router.get('/verify-auth', authMiddleware, controller.verifyAuth);
 
 export const controlRoute = router;
-

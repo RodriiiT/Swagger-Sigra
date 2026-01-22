@@ -5,18 +5,127 @@ import { submissionUploadMiddleware } from "../../../api/middlewares/multer.midd
 const router = Router();
 const controller = new SubmissionController({SubmissionModel: SubmissionModel});
 
-// Rutas relacionadas a las entregas
-// Ruta para obtener todas las entregas de una actividad
+/**
+ * @openapi
+ * tags:
+ *   name: Módulo IV - Submissions
+ *   description: Gestión de entregas de actividades y buzón de alumnos
+ */
+
+/**
+ * @openapi
+ * /api/submissions/activities/{activityId}/submissions:
+ *   get:
+ *     tags: [Módulo IV - Submissions]
+ *     summary: Obtener todas las entregas de una actividad específica (Vista Docente)
+ *     parameters:
+ *       - in: path
+ *         name: activityId
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Lista de entregas de los alumnos
+ */
 router.get('/activities/:activityId/submissions', controller.getSubmissionByActivityId);
-// Ruta para obtener una entrega por su ID
+
+/**
+ * @openapi
+ * /api/submissions/submission/{submissionId}:
+ *   get:
+ *     tags: [Módulo IV - Submissions]
+ *     summary: Obtener detalle de una entrega específica
+ *     parameters:
+ *       - in: path
+ *         name: submissionId
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Datos de la entrega encontrados
+ */
 router.get('/submission/:submissionId', controller.getSubmissionById);
-// Ruta para obtener todas las entregas de un estudiante
+
+/**
+ * @openapi
+ * /api/submissions/students/{studentUserId}/submissions:
+ *   get:
+ *     tags: [Módulo IV - Submissions]
+ *     summary: Obtener todas las entregas de un estudiante específico (Vista Alumno)
+ *     description: Retorna el histórico de archivos subidos por el alumno, incluyendo nota y feedback si ya existen.
+ *     parameters:
+ *       - in: path
+ *         name: studentUserId
+ *         required: true
+ *         schema: { type: integer, example: 3 }
+ *     responses:
+ *       200:
+ *         description: JSON con entregas y score
+ */
 router.get('/students/:studentUserId/submissions', controller.getSubmissionByUserId);
-// Ruta para crear una nueva entrega
+
+/**
+ * @openapi
+ * /api/submissions/create:
+ *   post:
+ *     tags: [Módulo IV - Submissions]
+ *     summary: Crear una nueva entrega de tarea (Subir archivo alumno)
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               activity_id: { type: integer }
+ *               student_user_id: { type: integer }
+ *               comments: { type: string }
+ *               file: { type: string, format: binary }
+ *     responses:
+ *       201:
+ *         description: Entrega realizada
+ */
 router.post('/create', submissionUploadMiddleware, controller.createSubmission);
-// Ruta para actualizar una entrega existente
+
+/**
+ * @openapi
+ * /api/submissions/update/{submissionId}:
+ *   patch:
+ *     tags: [Módulo IV - Submissions]
+ *     summary: Re-entregar o editar una entrega existente
+ *     parameters:
+ *       - in: path
+ *         name: submissionId
+ *         required: true
+ *         schema: { type: integer }
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               comments: { type: string }
+ *               file: { type: string, format: binary }
+ *     responses:
+ *       200:
+ *         description: Entrega actualizada
+ */
 router.patch('/update/:submissionId', submissionUploadMiddleware, controller.updateSubmission);
-// Ruta para eliminar una entrega
+
+/**
+ * @openapi
+ * /api/submissions/delete/{submissionId}:
+ *   delete:
+ *     tags: [Módulo IV - Submissions]
+ *     summary: Eliminar una entrega y borrar archivo físico
+ *     parameters:
+ *       - in: path
+ *         name: submissionId
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Entrega borrada
+ */
 router.delete('/delete/:submissionId', controller.deleteSubmission);
 
 export const SubmissionRoute = router;
