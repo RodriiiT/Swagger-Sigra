@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000/api/manager';
+const API_URL = 'https://sigra-backend.onrender.com/api/manager';
 const SUBMISSIONS_API = 'http://localhost:3000/api/submissions';
 const STUDENT_ID = 3;
 

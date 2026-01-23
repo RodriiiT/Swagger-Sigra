@@ -10,7 +10,11 @@ import { activityNotifierMiddleware } from "./src/api/middlewares/email.middlewa
 
 const app = express();
 
-app.use(cors({ origin: '*' })); // Permitir todo para pruebas
+app.use(cors({
+    origin: '*', // Esto permite que tu URL de Vercel se conecte sin problemas
+    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(json());
 app.use(morgan("dev"));
 app.use(activityNotifierMiddleware);
