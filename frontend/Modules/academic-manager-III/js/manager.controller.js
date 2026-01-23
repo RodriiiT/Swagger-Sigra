@@ -1,4 +1,7 @@
-const API_URL = 'http://localhost:3000/api/manager';
+// Allow overriding the API base in production to avoid hitting localhost from Vercel
+const API_URL = (typeof window !== 'undefined' && window.API_BASE_URL)
+  ? `${window.API_BASE_URL}/api/manager`
+  : 'http://localhost:3000/api/manager';
 
 const storedUser = JSON.parse(localStorage.getItem('sigra_user') || 'null');
 const STUDENT_ID = storedUser?.id || storedUser?.user_id;
