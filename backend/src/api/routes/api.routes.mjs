@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { SETTINGS } from "../../../config/settings.config.mjs";
 import { controlRoute } from "../../modules/access-control-I/control.route.mjs";
+import { teacherAssignmentAccessRoute } from "../../modules/access-control-I/teacher-assignments/teacher-assignment.route.mjs";
 import { subjectRoute } from "../../modules/academic-structure-II/subjects/subjects.route.mjs";
 import { GradesLogRoutes } from "../../modules/grades-record-V/grades/grades.route.mjs";
 import { prelaciesRoute } from "../../modules/academic-structure-II/prelacies/prelacies.route.mjs";
@@ -16,13 +17,15 @@ import { SubmissionRoute } from "../../modules/teaching-manager-IV/submissions/s
 import { ResourceRoute } from "../../modules/teaching-manager-IV/courseResources/resources.route.mjs";
 import { EnrollmentRouter } from "../../modules/academic-structure-II/enrollments/enrollment.route.mjs";
 import { AssistanceRouter } from "../../modules/teaching-manager-IV/assistance/assistance.route.mjs";
+import { academicAssignmentRoute } from "../../modules/academic-structure-II/assignments/assignment.route.mjs";
 
 const router = Router();
 
 
 export const ListRoutes = {
     auth: {
-        control: router.use(`${SETTINGS.BASE_PATH}/auth`, controlRoute)
+        control: router.use(`${SETTINGS.BASE_PATH}/auth`, controlRoute),
+        teacherAssignments: router.use(`${SETTINGS.BASE_PATH}/auth`, teacherAssignmentAccessRoute)
     },
     academicStructure: {
         subjects: router.use(`${SETTINGS.BASE_PATH}/subjects`, subjectRoute),
@@ -30,7 +33,8 @@ export const ListRoutes = {
         sections: router.use(`${SETTINGS.BASE_PATH}/sections`, SectionRoutes),
         gradeAcademic: router.use(`${SETTINGS.BASE_PATH}/grades`, GradeRoutes),
         years: router.use(`${SETTINGS.BASE_PATH}/years`, YearRoutes),
-        enrollments: router.use(`${SETTINGS.BASE_PATH}/enrollments`, EnrollmentRouter)
+        enrollments: router.use(`${SETTINGS.BASE_PATH}/enrollments`, EnrollmentRouter),
+        academicAssignments: router.use(`${SETTINGS.BASE_PATH}/academic-assignments`, academicAssignmentRoute)
     },
     grades: {
         grades: router.use(`${SETTINGS.BASE_PATH}/grades-log`, GradesLogRoutes)

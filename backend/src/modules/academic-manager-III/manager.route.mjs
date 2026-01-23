@@ -4,9 +4,14 @@ import * as courseController from './manager.controller.mjs'
 
 const router = express.Router()
 
+// Configurar multer para subir archivos de entrega
 const storage = multer.diskStorage({
 	destination: (req, file, cb) => cb(null, './uploads/submissions'),
-	filename: (req, file, cb) => cb(null, `${Date.now()}_${file.originalname.replace(/\s/g, '_')}`)
+	filename: (req, file, cb) => {
+		const ts = Date.now();
+		const safe = file.originalname.replace(/[^a-z0-9.\-\_]/gi, '_');
+		cb(null, `${ts}_${safe}`);
+	}
 });
 const upload = multer({ storage });
 
@@ -146,21 +151,7 @@ router.post('/activities/:activityId/upload', upload.single('file'), courseContr
  */
 router.post('/courses', courseController.createCourse)
 
-/**
- * @openapi
- * /api/manager/schedule/{studentId}:
- *   get:
- *     tags: [Módulo III - Student Manager]
- *     summary: Obtener horario de clases del estudiante
- *     parameters:
- *       - in: path
- *         name: studentId
- *         required: true
- *         schema: { type: integer }
- *     responses:
- *       200:
- *         description: Horario generado
- */
+// ===== RUTAS DE HORARIOS =====
 router.get('/schedule/:studentId', courseController.getScheduleByStudent)
 
 /**

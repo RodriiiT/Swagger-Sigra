@@ -26,6 +26,23 @@ router.get('/all', sectionController.getAllSections);
 
 /**
  * @openapi
+ * /api/sections/grade/{gradeId}:
+ *   get:
+ *     tags: [Módulo II - Sections]
+ *     summary: Listar secciones por grado
+ *     parameters:
+ *       - in: path
+ *         name: gradeId
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Lista de secciones para el grado
+ */
+router.get('/grade/:gradeId', sectionController.getSectionsByGrade);
+
+/**
+ * @openapi
  * /api/sections/section/{sectionId}:
  *   get:
  *     tags: [Módulo II - Sections]
