@@ -1,5 +1,5 @@
 const API_URL = 'https://sigra-backend.onrender.com/api/manager';
-const SUBMISSIONS_API = 'http://localhost:3000/api/submissions';
+const SUBMISSIONS_API = 'https://sigra-backend.onrender.com/api/submissions';
 const STUDENT_ID = 3;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -78,7 +78,7 @@ function updateUIAsSubmitted(submission) {
     // 3. Normalizar la ruta del archivo para visualización
     let cleanPath = submission.file_path.replace(/\\/g, '/');
     if (!cleanPath.startsWith('/')) cleanPath = '/' + cleanPath;
-    const fileURL = `http://localhost:3000${cleanPath}`;
+    const fileURL = `https://sigra-backend.onrender.com${cleanPath}`;
     const fileName = cleanPath.split('/').pop();
 
     // 4. Ocultar zona de carga y mostrar tarjeta de archivo

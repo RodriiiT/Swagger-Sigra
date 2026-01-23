@@ -5,7 +5,7 @@ const currentUserProfesor = { id: 2, name: 'María González', role: 'profesor' 
 const currentUserEstudiante = { id: 3, name: 'Luis Ramírez', role: 'estudiante', seccion: 'A' };
 
 // URL base del backend (cambiar si el servidor está en otra URL/puerto)
-const API_BASE = 'http://localhost:4300/api';
+const API_BASE = 'https://sigra-backend.onrender.com/api';
 
 // Exponer flag para mostrar UI de desarrollo solo en entornos locales
 const IS_LOCALHOST = ['localhost','127.0.0.1'].includes(location.hostname);
@@ -32,7 +32,7 @@ window._showBackendOfflineBanner = () => {
 
 // Helper: quick health check against server root /_health. Returns true/false
 window.checkBackendHealth = async (timeout = 3000) => {
-    const healthUrl = (window.API_BASE || 'http://localhost:4300/api').replace(/\/api$/, '') + '/_health';
+    const healthUrl = (window.API_BASE || 'https://sigra-backend.onrender.com/api').replace(/\/api$/, '') + '/_health';
     try{
         const controller = new AbortController();
         const id = setTimeout(() => controller.abort(), timeout);

@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:4300/api/management";
+const BASE_URL = "https://sigra-backend.onrender.com/api/management";
 
 async function request(path, options = {}) {
 	const res = await fetch(`${BASE_URL}${path}`, {
