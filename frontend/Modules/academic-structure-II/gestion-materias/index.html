@@ -3,47 +3,90 @@
 
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>SIGRA - Gestión de Materias</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Gestión de Materias - SIGRA</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#002F87",
+                        "success": "#10B981",
+                        "error": "#C52B3D",
+                        "background-light": "#F3F4F6",
+                        "background-dark": "#1a1c20",
+                        "content-card": "#FFFFFF",
+                        "text-main": "#1F2937",
+                        "nav-gray": "#64748B"
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style type="text/tailwindcss">
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
     <link rel="stylesheet" href="./css/base.css" />
     <link rel="stylesheet" href="./css/materias-por-grado.css" />
+    <link rel="stylesheet" href="../css/navbar.css" />
 </head>
 
-<body>
-    <header class="barra-superior">
-        <div class="contenedor barra-superior__contenido">
-            <div class="marca">
-                <div class="marca__icono" aria-hidden="true">
-                    <img src="./assets/BLANCO CON FONDO.svg" alt="" width="40" height="40" />
-                </div>
-                <div class="marca__texto">
-                    <div class="marca__titulo">SIGRA</div>
-                </div>
+<body
+    class="bg-background-light dark:bg-background-dark font-display text-text-main antialiased min-h-screen flex flex-col">
+    <header>
+        <nav class="navbar" aria-label="Barra de navegación principal">
+            <a class="brand" aria-label="SIGRA" href="../../access-control-I/user-table.html">
+                <img class="brand-logo" src="../../../Public/resources/Modulo-1/logo.png" alt="Logo SIGRA" />
+                <span>SIGRA</span>
+            </a>
+
+            <div class="nav-links" role="list">
+                <a href="../../access-control-I/user-table.html" role="listitem">Inicio</a>
+                <a href="../catalogo-materias/index.html" role="listitem">Catalogo</a>
+                <a class="active" href="../gestion-materias/index.html" role="listitem">Materias</a>
+                <a href="../definicion-prelaciones/index.html" role="listitem">Prelaciones</a>
+                <a href="../Gestionar Asignaciones/index.html" role="listitem"> Inscripción</a>
+                <a href="../Gestionar Asignaciones/gestionar-asignacion.html" role="listitem">Asignacion</a>
             </div>
 
-            <nav class="nav nav--principal" aria-label="Navegación principal">
-                <a class="nav__enlace nav__enlace--activo" href="#" aria-current="page">Inicio</a>
-                <a class="nav__enlace" href="#">Usuarios</a>
-                <a class="nav__enlace" href="#">Asignaturas</a>
-                <a class="nav__enlace" href="#">Docentes</a>
-                <a class="nav__enlace" href="#">Reportes</a>
-            </nav>
-
-            <div class="acciones">
-                <button class="accion-icono" type="button" aria-label="Notificaciones">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                        <path d="M18 8a6 6 0 10-12 0c0 7-3 7-3 7h18s-3 0-3-7" stroke="currentColor" stroke-width="1.8"
-                            stroke-linecap="round" stroke-linejoin="round" />
-                        <path d="M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" stroke-width="1.8"
-                            stroke-linecap="round" />
-                    </svg>
+            <div class="profile-menu" aria-label="Menú de perfil">
+                <button class="profile-button" id="profile-button" type="button" aria-haspopup="true"
+                    aria-expanded="false">
+                    <span class="profile-avatar" id="profile-avatar" aria-hidden="true">--</span>
+                    <span class="sr-only">Abrir menú de perfil</span>
                 </button>
-
-                <div class="foto-perfil" aria-label="Foto de perfil">
-                    <img class="foto-perfil__img" src="assets/maxresdefault.jpg" alt="Foto de perfil" />
+                <div class="profile-dropdown" id="profile-dropdown" role="menu">
+                    <ul class="profile-list" role="menu">
+                        <li class="profile-info" id="profile-info-name" role="presentation">Usuario</li>
+                        <li role="none"><button type="button" class="profile-item" data-profile-action="create"
+                                role="menuitem">Crear usuario</button></li>
+                        <li role="none"><button type="button" class="profile-item" data-profile-action="edit"
+                                role="menuitem">Editar
+                                usuario</button></li>
+                        <li role="none"><button type="button" class="profile-item" data-profile-action="logout"
+                                role="menuitem">Cerrar sesión</button></li>
+                    </ul>
                 </div>
             </div>
-        </div>
+        </nav>
     </header>
 
     <main class="contenedor pagina">
@@ -184,6 +227,7 @@
     </main>
 
     <script type="module" src="./js/main.js"></script>
+    <script src="../js/navbar.js"></script>
 </body>
 
 </html>

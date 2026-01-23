@@ -1,44 +1,94 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIGRA - Módulo Académico</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Catálogo de Materias - SIGRA</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#002F87",
+                        "success": "#10B981",
+                        "error": "#C52B3D",
+                        "background-light": "#F3F4F6",
+                        "background-dark": "#1a1c20",
+                        "content-card": "#FFFFFF",
+                        "text-main": "#1F2937",
+                        "nav-gray": "#64748B"
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style type="text/tailwindcss">
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="../css/navbar.css" />
 </head>
-<body>
-    <div class="app-container">
-        <header class="top-header">
-            <nav class="navbar">
-            <div class="nav-logo">
-                <a href="index.html"><img src="recursos/sigra-logo.svg" width="50" height="40" alt="Logo SIGRA"></a>
-                <span class="brand">SIGRA</span>
+
+<body
+    class="bg-background-light dark:bg-background-dark font-display text-text-main antialiased min-h-screen flex flex-col">
+    <header>
+        <nav class="navbar" aria-label="Barra de navegación principal">
+            <a class="brand" aria-label="SIGRA" href="../../access-control-I/user-table.html">
+                <img class="brand-logo" src="../../../Public/resources/Modulo-1/logo.png" alt="Logo SIGRA" />
+                <span>SIGRA</span>
+            </a>
+
+            <div class="nav-links" role="list">
+                <a href="../../access-control-I/user-table.html" role="listitem">Inicio</a>
+                <a class="active" href="../catalogo-materias/index.html" role="listitem">Catalogo</a>
+                <a href="../gestion-materias/index.html" role="listitem">Materias</a>
+                <a href="../definicion-prelaciones/index.html" role="listitem">Prelaciones</a>
+                <a href="../Gestionar Asignaciones/index.html" role="listitem"> Inscripción</a>
+                <a href="../Gestionar Asignaciones/gestionar-asignacion.html" role="listitem">Asignacion</a>
             </div>
 
-            <div class="nav-right-group">
-                <ul class="nav-links">
-                    <li><a href="#">Inicio</a></li>
-                    <li><a href="#">Usuarios</a></li>
-                    <li><a href="#" class="active" onclick="showView('catalogo')">Asignaturas</a></li>
-                    <li><a href="#">Docentes</a></li>
-                    <li><a href="#">Reportes</a></li>
-                </ul>
-
-                <div class="nav-icons">
-                    <div class="icon-bell">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-                    </div>
-                    
-                    <a href="/perfil" class="user-profile-link">
-                        <img src="recursos/usuario-perfil.jpg" alt="User" class="user-avatar">
-                    </a>
+            <div class="profile-menu" aria-label="Menú de perfil">
+                <button class="profile-button" id="profile-button" type="button" aria-haspopup="true"
+                    aria-expanded="false">
+                    <span class="profile-avatar" id="profile-avatar" aria-hidden="true">--</span>
+                    <span class="sr-only">Abrir menú de perfil</span>
+                </button>
+                <div class="profile-dropdown" id="profile-dropdown" role="menu">
+                    <ul class="profile-list" role="menu">
+                        <li class="profile-info" id="profile-info-name" role="presentation">Usuario</li>
+                        <li role="none"><button type="button" class="profile-item" data-profile-action="create"
+                                role="menuitem">Crear usuario</button></li>
+                        <li role="none"><button type="button" class="profile-item" data-profile-action="edit"
+                                role="menuitem">Editar
+                                usuario</button></li>
+                        <li role="none"><button type="button" class="profile-item" data-profile-action="logout"
+                                role="menuitem">Cerrar sesión</button></li>
+                    </ul>
                 </div>
             </div>
-            </nav>
-        </header>
-        
+        </nav>
+    </header>
+
+    <div class="app-container">
         <main class="main">
             <div id="view-container" class="view-content"></div>
         </main>
@@ -59,6 +109,10 @@
     <!-- Toast Notification Container -->
     <div id="toast-container"></div>
 
-    <script src="js/main.js"></script> </body>
-</html></content>
-<parameter class="parameter" name="filePath">c:\Users\mauri\OneDrive\Escritorio\Mauricio\5to_Semestre\prograWeb\Sigra-Academy\frontend\Modules\academic-structure-II\catalogo-materias\index.html
+    </div>
+
+    <script src="js/main.js"></script>
+    <script src="../js/navbar.js"></script>
+</body>
+
+</html>
