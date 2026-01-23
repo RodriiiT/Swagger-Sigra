@@ -5,7 +5,7 @@
   "rewrites": [
     {
       "source": "/",
-      "dest": "/frontend/Modules/landing/index.html"
+      "destination": "/frontend/Modules/landing/index.html"
     }
   ]
 }
