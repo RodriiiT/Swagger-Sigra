@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000/api/manager'; 
+const API_URL = 'https://sigra-backend.onrender.com/api/manager'; 
 const STUDENT_ID = 3; 
 
 document.addEventListener('DOMContentLoaded', () => {
