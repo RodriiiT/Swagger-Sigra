@@ -35,6 +35,22 @@ export class subjectController {
         }
     }
 
+    // controlador para obtener materias por grado
+    getSubjectsByGrade = async (req, res) => {
+        const { gradeId } = req.params
+        try {
+            const result = await this.model.getSubjectsByGrade(gradeId)
+            if (result.error) return res.status(404).json({ error: result.error });
+            return res.status(200).json({
+                message: result.message,
+                subjects: result.subjects
+            });
+        }
+        catch (error) {
+            return res.status(500).json({ error: "Error interno del servidor" })
+        }
+    }
+
     // controlador para crear una materia
     createSubject = async (req, res) => {
         // Map frontend field names to backend field names
@@ -117,6 +133,19 @@ export class subjectController {
         catch (error) {
             console.error('Update error:', error)
             return res.status(500).json({ error: "Error interno del servidor" })
+        }
+    }
+
+    // controlador para actualizar asignaciones de materias a un grado
+    updateSubjectGradeAssignments = async (req, res) => {
+        const { gradeId, subjectIds } = req.body;
+        try {
+            const result = await this.model.updateSubjectGradeAssignments(gradeId, subjectIds);
+            if (result.error) return res.status(400).json({ error: result.error });
+            return res.status(200).json(result);
+        } catch (error) {
+            console.error('Error in updateSubjectGradeAssignments:', error);
+            return res.status(500).json({ error: "Error interno del servidor" });
         }
     }
 

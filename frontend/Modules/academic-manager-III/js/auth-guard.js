@@ -8,7 +8,7 @@
 
     try {
         // Opcional: Preguntar al backend si el token sigue siendo válido
-        const response = await fetch('https://sigra-backend.onrender.com/api/auth/verify-auth', {
+        const response = await fetch('https://sigra.irissoftware.lat/api/auth/verify-auth', {
             headers: { 'Authorization': `Bearer ${token}` }
         });
 

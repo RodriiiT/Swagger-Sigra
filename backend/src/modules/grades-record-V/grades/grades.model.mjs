@@ -50,17 +50,18 @@ export class GradesLogModel {
         const [existingUser] = await db.query(
             `SELECT u.*,r.* FROM users u
             JOIN roles r ON u.role_id = r.role_id
-            WHERE u.user_id = ? AND r.role_name = 'Estudiante'`,
+            WHERE u.user_id = ? AND r.role_name = 'student'`,
             [userId]
         );
         if (existingUser.length === 0) return { error: 'El usuario no existe o no es un estudiante.' };
         // Si existe, se obtienen los registros de calificaciones de dicho estudiante
         const [gradesLog] = await db.query(
             `SELECT gl.grade_id, gl.activity_id, gl.student_user_id, CONCAT(u.first_name, ' ', u.last_name) AS student_name,
-            gl.score, gl.feedback, a.title, s.section_name FROM grades_log gl JOIN users u ON gl.student_user_id = u.user_id
+            gl.score, gl.feedback, a.title, a.weight_percentage, s.section_name, su.subject_name FROM grades_log gl JOIN users u ON gl.student_user_id = u.user_id
             JOIN activities a ON gl.activity_id = a.activity_id
             JOIN teacher_assignments ta ON a.assignment_id = ta.assignment_id
             JOIN sections s ON ta.section_id = s.section_id
+            JOIN subjects su ON ta.subject_id = su.subject_id
             WHERE gl.student_user_id = ?`,
             [userId]
         );
@@ -131,7 +132,7 @@ export class GradesLogModel {
         );
         const [existingUser] = await db.query(
             `SELECT u.*, r.* FROM users u JOIN roles r ON r.role_id = u.role_id
-            WHERE u.user_id = ? AND r.role_name = 'Estudiante'`,
+            WHERE u.user_id = ? AND r.role_name = 'student'`,
             [student_user_id]
         );
         if (existingActivity.length === 0 || existingUser.length === 0) {

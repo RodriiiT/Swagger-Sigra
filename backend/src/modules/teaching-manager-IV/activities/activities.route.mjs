@@ -9,15 +9,27 @@ const controller = new ActivitiesController({ActivitiesModel});
  * @openapi
  * tags:
  *   name: Módulo IV - Activities
- *   description: Definición y gestión de tareas por parte de los docentes
+ *   description: Gestión de actividades académicas
  */
+
+/**
+ * @openapi
+ * /api/activities/all:
+ *   get:
+ *     tags: [Módulo IV - Activities]
+ *     summary: Obtener todas las actividades
+ *     responses:
+ *       200:
+ *         description: Lista de actividades
+ */
+router.get('/all', controller.getAllActivities);
 
 /**
  * @openapi
  * /api/activities/assignments/{assignmentId}/activities:
  *   get:
  *     tags: [Módulo IV - Activities]
- *     summary: Obtener todas las actividades de una asignación específica
+ *     summary: Obtener actividades por asignación
  *     parameters:
  *       - in: path
  *         name: assignmentId
@@ -25,16 +37,33 @@ const controller = new ActivitiesController({ActivitiesModel});
  *         schema: { type: integer }
  *     responses:
  *       200:
- *         description: Lista de actividades obtenida
+ *         description: Lista de actividades por asignación
  */
 router.get('/assignments/:assignmentId/activities', controller.getActivitiesByAssignment);
+
+/**
+ * @openapi
+ * /api/activities/subject/{subjectId}/activities:
+ *   get:
+ *     tags: [Módulo IV - Activities]
+ *     summary: Obtener actividades por materia
+ *     parameters:
+ *       - in: path
+ *         name: subjectId
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Lista de actividades por materia
+ */
+router.get('/subject/:subjectId/activities', controller.getActivitiesBySubject);
 
 /**
  * @openapi
  * /api/activities/activity/{activityId}:
  *   get:
  *     tags: [Módulo IV - Activities]
- *     summary: Obtener instrucciones detalladas de una actividad
+ *     summary: Obtener una actividad por ID
  *     parameters:
  *       - in: path
  *         name: activityId
@@ -42,7 +71,7 @@ router.get('/assignments/:assignmentId/activities', controller.getActivitiesByAs
  *         schema: { type: integer }
  *     responses:
  *       200:
- *         description: Datos de la actividad obtenidos
+ *         description: Actividad encontrada
  */
 router.get('/activity/:activityId', controller.getActivityById);
 
@@ -51,19 +80,12 @@ router.get('/activity/:activityId', controller.getActivityById);
  * /api/activities/activity/{activityId}/visibility:
  *   patch:
  *     tags: [Módulo IV - Activities]
- *     summary: Cambiar visibilidad de una actividad (Mostrar/Ocultar)
+ *     summary: Cambiar la visibilidad de una actividad
  *     parameters:
  *       - in: path
  *         name: activityId
  *         required: true
  *         schema: { type: integer }
- *     requestBody:
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               isVisible: { type: boolean }
  *     responses:
  *       200:
  *         description: Visibilidad actualizada
@@ -75,7 +97,7 @@ router.patch('/activity/:activityId/visibility', controller.toggleActivityVisibi
  * /api/activities/create:
  *   post:
  *     tags: [Módulo IV - Activities]
- *     summary: Crear una nueva actividad evaluada
+ *     summary: Crear una nueva actividad
  *     requestBody:
  *       required: true
  *       content:
@@ -83,11 +105,11 @@ router.patch('/activity/:activityId/visibility', controller.toggleActivityVisibi
  *           schema:
  *             type: object
  *             properties:
- *               assignment_id: { type: integer }
- *               title: { type: string, example: "Tarea de Redes" }
- *               description: { type: string }
- *               weight_percentage: { type: number, example: 20 }
- *               due_date: { type: string, format: date-time, example: "2024-12-31T23:59:59Z" }
+ *               title: { type: string, example: "Tarea 1" }
+ *               description: { type: string, example: "Resolver ejercicios" }
+ *               assignment_id: { type: integer, example: 12 }
+ *               subject_id: { type: integer, example: 4 }
+ *               due_date: { type: string, format: date, example: "2026-02-15" }
  *     responses:
  *       201:
  *         description: Actividad creada
@@ -99,13 +121,14 @@ router.post('/create', controller.createActivity);
  * /api/activities/update/{activityId}:
  *   patch:
  *     tags: [Módulo IV - Activities]
- *     summary: Actualizar datos de una actividad
+ *     summary: Actualizar una actividad existente
  *     parameters:
  *       - in: path
  *         name: activityId
  *         required: true
  *         schema: { type: integer }
  *     requestBody:
+ *       required: true
  *       content:
  *         application/json:
  *           schema:
@@ -113,9 +136,7 @@ router.post('/create', controller.createActivity);
  *             properties:
  *               title: { type: string }
  *               description: { type: string }
- *               weight_percentage: { type: number }
- *               due_date: { type: string, format: date-time }
- *               is_active: { type: boolean }
+ *               due_date: { type: string, format: date }
  *     responses:
  *       200:
  *         description: Actividad actualizada
@@ -127,7 +148,7 @@ router.patch('/update/:activityId', controller.updateActivity);
  * /api/activities/delete/{activityId}:
  *   delete:
  *     tags: [Módulo IV - Activities]
- *     summary: Eliminar una actividad permanentemente
+ *     summary: Eliminar una actividad
  *     parameters:
  *       - in: path
  *         name: activityId

@@ -9,7 +9,7 @@ const controller = new SubmissionController({SubmissionModel: SubmissionModel});
  * @openapi
  * tags:
  *   name: Módulo IV - Submissions
- *   description: Gestión de entregas de actividades y buzón de alumnos
+ *   description: Gestión de entregas de actividades
  */
 
 /**
@@ -17,7 +17,7 @@ const controller = new SubmissionController({SubmissionModel: SubmissionModel});
  * /api/submissions/activities/{activityId}/submissions:
  *   get:
  *     tags: [Módulo IV - Submissions]
- *     summary: Obtener todas las entregas de una actividad específica (Vista Docente)
+ *     summary: Obtener todas las entregas de una actividad
  *     parameters:
  *       - in: path
  *         name: activityId
@@ -25,16 +25,33 @@ const controller = new SubmissionController({SubmissionModel: SubmissionModel});
  *         schema: { type: integer }
  *     responses:
  *       200:
- *         description: Lista de entregas de los alumnos
+ *         description: Lista de entregas de la actividad
  */
 router.get('/activities/:activityId/submissions', controller.getSubmissionByActivityId);
+
+/**
+ * @openapi
+ * /api/submissions/assignments/{assignmentId}/submissions:
+ *   get:
+ *     tags: [Módulo IV - Submissions]
+ *     summary: Obtener todas las entregas de una asignación
+ *     parameters:
+ *       - in: path
+ *         name: assignmentId
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Lista de entregas de la asignación
+ */
+router.get('/assignments/:assignmentId/submissions', controller.getSubmissionByAssignmentId);
 
 /**
  * @openapi
  * /api/submissions/submission/{submissionId}:
  *   get:
  *     tags: [Módulo IV - Submissions]
- *     summary: Obtener detalle de una entrega específica
+ *     summary: Obtener una entrega por ID
  *     parameters:
  *       - in: path
  *         name: submissionId
@@ -42,7 +59,7 @@ router.get('/activities/:activityId/submissions', controller.getSubmissionByActi
  *         schema: { type: integer }
  *     responses:
  *       200:
- *         description: Datos de la entrega encontrados
+ *         description: Entrega encontrada
  */
 router.get('/submission/:submissionId', controller.getSubmissionById);
 
@@ -51,16 +68,15 @@ router.get('/submission/:submissionId', controller.getSubmissionById);
  * /api/submissions/students/{studentUserId}/submissions:
  *   get:
  *     tags: [Módulo IV - Submissions]
- *     summary: Obtener todas las entregas de un estudiante específico (Vista Alumno)
- *     description: Retorna el histórico de archivos subidos por el alumno, incluyendo nota y feedback si ya existen.
+ *     summary: Obtener todas las entregas de un estudiante
  *     parameters:
  *       - in: path
  *         name: studentUserId
  *         required: true
- *         schema: { type: integer, example: 3 }
+ *         schema: { type: integer }
  *     responses:
  *       200:
- *         description: JSON con entregas y score
+ *         description: Lista de entregas del estudiante
  */
 router.get('/students/:studentUserId/submissions', controller.getSubmissionByUserId);
 
@@ -69,20 +85,22 @@ router.get('/students/:studentUserId/submissions', controller.getSubmissionByUse
  * /api/submissions/create:
  *   post:
  *     tags: [Módulo IV - Submissions]
- *     summary: Crear una nueva entrega de tarea (Subir archivo alumno)
+ *     summary: Crear una nueva entrega
  *     requestBody:
+ *       required: true
  *       content:
  *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
- *               activity_id: { type: integer }
- *               student_user_id: { type: integer }
- *               comments: { type: string }
- *               file: { type: string, format: binary }
+ *               activity_id: { type: integer, example: 10 }
+ *               student_user_id: { type: integer, example: 25 }
+ *               file:
+ *                 type: string
+ *                 format: binary
  *     responses:
  *       201:
- *         description: Entrega realizada
+ *         description: Entrega creada
  */
 router.post('/create', submissionUploadMiddleware, controller.createSubmission);
 
@@ -91,20 +109,22 @@ router.post('/create', submissionUploadMiddleware, controller.createSubmission);
  * /api/submissions/update/{submissionId}:
  *   patch:
  *     tags: [Módulo IV - Submissions]
- *     summary: Re-entregar o editar una entrega existente
+ *     summary: Actualizar una entrega existente
  *     parameters:
  *       - in: path
  *         name: submissionId
  *         required: true
  *         schema: { type: integer }
  *     requestBody:
+ *       required: true
  *       content:
  *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
- *               comments: { type: string }
- *               file: { type: string, format: binary }
+ *               file:
+ *                 type: string
+ *                 format: binary
  *     responses:
  *       200:
  *         description: Entrega actualizada
@@ -116,7 +136,7 @@ router.patch('/update/:submissionId', submissionUploadMiddleware, controller.upd
  * /api/submissions/delete/{submissionId}:
  *   delete:
  *     tags: [Módulo IV - Submissions]
- *     summary: Eliminar una entrega y borrar archivo físico
+ *     summary: Eliminar una entrega
  *     parameters:
  *       - in: path
  *         name: submissionId
@@ -124,7 +144,7 @@ router.patch('/update/:submissionId', submissionUploadMiddleware, controller.upd
  *         schema: { type: integer }
  *     responses:
  *       200:
- *         description: Entrega borrada
+ *         description: Entrega eliminada
  */
 router.delete('/delete/:submissionId', controller.deleteSubmission);
 

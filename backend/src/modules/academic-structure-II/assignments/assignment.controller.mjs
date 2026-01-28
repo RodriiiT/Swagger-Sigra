@@ -36,6 +36,18 @@ export class AssignmentController {
         }
     }
 
+    getAllTeachers = async (req, res) => {
+        const { academicYearId } = req.query; // Optional query parameter
+        try {
+            const result = await this.assignmentModel.getAllTeachers(academicYearId ? Number(academicYearId) : null);
+            if (result.error) return res.status(404).json({ error: result.error });
+            return res.status(200).json(result);
+        } catch (error) {
+            console.error('Error in getAllTeachers:', error);
+            return res.status(500).json({ error: 'Error al obtener profesores' });
+        }
+    }
+
     getAssignedTeachers = async (req, res) => {
         const { sectionId } = req.params;
         try {
@@ -51,6 +63,11 @@ export class AssignmentController {
         try {
             const result = await this.assignmentModel.assignTeacher(req.body);
             if (result.error) return res.status(400).json({ error: result.error });
+            res.locals.notify = {
+                userId: result.teacher_user_id,
+                message: 'Has sido asignado a una nueva sección.',
+                type: 'Info'
+            }
             return res.status(201).json(result);
         } catch (error) {
             return res.status(500).json({ error: 'Error al asignar profesor' });
@@ -62,6 +79,11 @@ export class AssignmentController {
         try {
             const result = await this.assignmentModel.unassignTeacher(Number(assignmentId));
             if (result.error) return res.status(404).json({ error: result.error });
+            res.locals.notify = {
+                userId: result.teacher_user_id,
+                message: 'Has sido desasignado de una sección.',
+                type: 'Info'
+            }
             return res.status(200).json(result);
         } catch (error) {
             return res.status(500).json({ error: 'Error al desasignar profesor' });

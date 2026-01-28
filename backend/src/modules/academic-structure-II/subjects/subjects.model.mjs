@@ -46,6 +46,28 @@ export class subjectModel {
         }
     }
 
+    // Metodo para obtener materias por grado
+    static async getSubjectsByGrade(gradeId) {
+        if (!gradeId) return { error: "El ID del grado es requerido" }
+        const [subjects] = await db.query(
+            `SELECT s.*, g.grade_name
+             FROM subjects s
+             JOIN grades g ON s.grade_id = g.grade_id
+             WHERE s.grade_id = ?`,
+            [gradeId]
+        );
+        if (subjects.length === 0) return { error: "No se han encontrado materias para este grado" }
+        // Map grade_name to anio for frontend compatibility
+        const mappedSubjects = subjects.map(subject => ({
+            ...subject,
+            anio: subject.grade_name
+        }));
+        return {
+            message: "Materias obtenidas exitosamente",
+            subjects: mappedSubjects
+        }
+    }
+
     // metodo para crear una materia
     static async createSubject(data) {
         if (!data) return { error: 'Faltan datos para crear la materia' };
@@ -162,6 +184,40 @@ export class subjectModel {
         return {
             message: 'Materia actualizada correctamente',
             subject: mappedSubject
+        }
+    }
+
+    // metodo para actualizar asignaciones de materias a un grado
+    static async updateSubjectGradeAssignments(gradeId, subjectIds) {
+        if (!gradeId) return { error: 'El ID del grado es requerido' };
+        if (!Array.isArray(subjectIds)) return { error: 'Los IDs de materias deben ser un array' };
+
+        try {
+            // Primero, desactivar todas las materias del grado actual
+            await db.query(
+                `UPDATE subjects SET is_active = 0 WHERE grade_id = ?`,
+                [gradeId]
+            );
+
+            // Luego, activar solo las materias seleccionadas para este grado
+            if (subjectIds.length > 0) {
+                const placeholders = subjectIds.map(() => '?').join(',');
+                await db.query(
+                    `UPDATE subjects 
+                     SET is_active = 1 
+                     WHERE subject_id IN (${placeholders}) AND grade_id = ?`,
+                    [...subjectIds, gradeId]
+                );
+            }
+
+            return {
+                message: 'Asignaciones actualizadas correctamente',
+                gradeId: gradeId,
+                assignedCount: subjectIds.length
+            };
+        } catch (error) {
+            console.error('Error updating subject assignments:', error);
+            return { error: 'Error al actualizar las asignaciones de materias' };
         }
     }
 

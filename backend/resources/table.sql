@@ -15,15 +15,37 @@ CREATE TABLE roles (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE permissions (
+    permission_id INT AUTO_INCREMENT PRIMARY KEY,
+    permission_name VARCHAR(100) NOT NULL UNIQUE, -- "manage_users", "view_grades"
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabla intermedia Roles-Permisos (Many-to-Many)
+CREATE TABLE role_permissions (
+    role_id INT NOT NULL,
+    permission_id INT NOT NULL,
+    PRIMARY KEY (role_id, permission_id),
+    FOREIGN KEY (role_id) REFERENCES roles(role_id) ON DELETE CASCADE,
+    FOREIGN KEY (permission_id) REFERENCES permissions(permission_id) ON DELETE CASCADE
+);
+
+
+
 -- Tabla Maestra de Usuarios (Entidad Fuerte)
 CREATE TABLE users (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
     role_id INT NOT NULL,
+    national_id VARCHAR(20) NOT NULL UNIQUE, -- DNI, Cédula
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
     email VARCHAR(150) NOT NULL UNIQUE,
     phone VARCHAR(12) NOT NULL,
     password_hash VARCHAR(255) NOT NULL, -- Almacenar hash, nunca texto plano
+    national_parent_id INT,
+    first_name_parent VARCHAR(100),
+    last_name_parent VARCHAR(100),
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -212,7 +234,7 @@ CREATE TABLE notifications (
     user_id INT NOT NULL, -- Destinatario
     title VARCHAR(100) NOT NULL,
     message TEXT NOT NULL,
-    type ENUM('Alerta', 'Info', 'Academico', 'Recordatorio') DEFAULT 'Info',
+    type ENUM('generic', 'activity', 'warning', 'notification') DEFAULT 'notification',
     is_read BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE

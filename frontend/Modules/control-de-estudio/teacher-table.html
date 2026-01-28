@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SIGRA | Gestión de Profesores</title>
+  <link rel="stylesheet" href="user-table.css" />
+</head>
+
+<body>
+  <!-- Navbar superior -->
+  <header>
+    <nav class="navbar" aria-label="Barra de navegación principal">
+      <a class="brand" aria-label="SIGRA" href="teacher-table.html">
+        <img class="brand-logo" src="../../Public/resources/Modulo-1/logo.png" alt="Logo SIGRA" />
+        <span>SIGRA</span>
+      </a>
+
+      <div class="nav-links" role="list">
+        <a class="active" href="teacher-table.html" role="listitem">Inicio</a>
+        <a href="../academic-structure-II/catalogo-materias/index.html" role="listitem">Catalogo</a>
+        <a href="../academic-structure-II/gestion-materias/index.html" role="listitem">Materias</a>
+        <a href="../academic-structure-II/definicion-prelaciones/index.html" role="listitem">Prelaciones</a>
+        <a href="../academic-structure-II/Gestionar Asignaciones/index.html" role="listitem"> Inscripción</a>
+        <a href="../academic-structure-II/Gestionar Asignaciones/gestionar-asignacion.html"
+          role="listitem">Asignacion</a>
+      </div>
+
+      <div class="profile-menu" aria-label="Menú de perfil">
+        <button class="profile-button" id="profile-button" type="button" aria-haspopup="true" aria-expanded="false">
+          <span class="profile-avatar" id="profile-avatar" aria-hidden="true">--</span>
+          <span class="sr-only">Abrir menú de perfil</span>
+        </button>
+        <div class="profile-dropdown" id="profile-dropdown" role="menu">
+          <ul class="profile-list" role="menu">
+            <li class="profile-info" id="profile-info-name" role="presentation">Usuario</li>
+            <li role="none"><button type="button" class="profile-item" data-profile-action="create"
+                role="menuitem">Crear usuario</button></li>
+            <li role="none"><button type="button" class="profile-item" data-profile-action="edit" role="menuitem">Editar
+                usuario</button></li>
+            <li role="none"><button type="button" class="profile-item" data-profile-action="logout"
+                role="menuitem">Cerrar sesión</button></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Contenido principal -->
+  <main>
+    <div class="page-header">
+      <h1>Dashboard de profesores</h1>
+      <p class="subtitle">Administra y supervisa la actividad de los profesores en el sistema.</p>
+    </div>
+
+    <div class="toolbar">
+      <div class="filter-group">
+        <label for="user-filter">Filtrar</label>
+        <input id="user-filter" type="text" placeholder="Buscar por nombre o correo" />
+      </div>
+      <div class="actions">
+        <button class="ghost-btn" type="button" id="add-user-btn">Agregar profesor nuevo</button>
+      </div>
+    </div>
+
+    <!-- Tabla de profesores -->
+    <section class="table-card" aria-label="Tabla de profesores">
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Usuario</th>
+              <th scope="col">Rol</th>
+              <th scope="col">Estado</th>
+              <th scope="col">Correo</th>
+              <th scope="col">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="users-body">
+            <tr id="users-loading">
+              <td colspan="5">Cargando profesores...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination" aria-label="Paginación de profesores">
+        <div id="pagination" class="pagination-content"></div>
+      </div>
+    </section>
+  </main>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const API_BASE = 'https://sigra.irissoftware.lat/api/auth'
+      const tbody = document.getElementById('users-body')
+      const loadingRow = document.getElementById('users-loading')
+      const profileBtn = document.getElementById('profile-button')
+      const profileDropdown = document.getElementById('profile-dropdown')
+      const profileAvatar = document.getElementById('profile-avatar')
+      const profileInfoName = document.getElementById('profile-info-name')
+      const paginationEl = document.getElementById('pagination')
+      const PAGE_SIZE = 8
+
+      const ROLE_LABELS = {
+        1: 'Administrador',
+        2: 'Docente',
+        3: 'Estudiante'
+      }
+
+      // ID del rol de profesor/docente
+      const TEACHER_ROLE_ID = 2
+
+      function badge(isActive) {
+        const active = Boolean(isActive)
+        const cls = active ? 'badge active' : 'badge inactive'
+        const text = active ? 'Activo' : 'Inactivo'
+        return `<span class="${cls}">${text}</span>`
+      }
+
+      function ensureRoleOption(selectEl, roleId) {
+        if (!selectEl || roleId === undefined || roleId === null) return
+        const roleValue = String(roleId)
+        const exists = Array.from(selectEl.options).some((opt) => opt.value === roleValue)
+        if (!exists) {
+          const opt = document.createElement('option')
+          opt.value = roleValue
+          opt.textContent = ROLE_LABELS[roleId] || `Rol ${roleValue}`
+          if (roleValue === '1') opt.disabled = true // Admin solo lectura
+          selectEl.appendChild(opt)
+        }
+      }
+
+      function actionButtonsFactory() {
+        const loggedUser = getStoredUser() || {}
+        const loggedId = loggedUser.id || loggedUser.user_id
+
+        return (user) => {
+          const roleId = Number(user.role_id)
+          const isAdminRow = roleId === 1
+          const isSelf = loggedId && Number(user.user_id) === Number(loggedId)
+
+          const encodedUser = encodeURIComponent(JSON.stringify(user))
+
+          const viewBtn = `
+                <button class="icon-link" type="button" data-action="view" data-user="${encodedUser}" aria-label="Ver profesor">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                    <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6" />
+                  </svg>
+                </button>`
+
+          const editBtn = `
+                <button class="icon-link" type="button" data-action="edit" data-user="${encodedUser}" aria-label="Editar profesor">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M4 20h4l9.5-9.5a1.5 1.5 0 0 0 0-2.12l-1.88-1.88a1.5 1.5 0 0 0-2.12 0L4 16v4Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" />
+                    <path d="M13.5 6.5 17.5 10.5" stroke="currentColor" stroke-width="1.6" />
+                  </svg>
+                </button>`
+
+          const deleteBtn = `
+                <button class="icon-link danger" type="button" data-action="delete" data-user="${encodedUser}" aria-label="Eliminar profesor">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M5.5 7h13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                    <path d="M10 10v6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                    <path d="M14 10v6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                    <path d="M9 7V5.5a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 5.5V7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                    <path d="M6.5 7 7 18a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l.5-11" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" />
+                  </svg>
+                </button>`
+
+          if (isAdminRow) {
+            if (isSelf) return `${viewBtn} ${editBtn}`
+            return viewBtn
+          }
+
+          return `${viewBtn} ${editBtn} ${deleteBtn}`
+        }
+      }
+
+      function renderPagination(totalPages) {
+        if (!paginationEl) return
+        if (totalPages <= 1) {
+          paginationEl.innerHTML = ''
+          return
+        }
+
+        let html = ''
+        const prevDisabled = currentPage === 1 ? 'disabled' : ''
+        const nextDisabled = currentPage === totalPages ? 'disabled' : ''
+
+        html += `<button class="page-item icon" type="button" data-page="${currentPage - 1}" aria-label="Página anterior" ${prevDisabled}>‹</button>`
+
+        for (let page = 1; page <= totalPages; page += 1) {
+          const active = page === currentPage ? 'active' : ''
+          const aria = page === currentPage ? 'aria-current="page"' : ''
+          html += `<button class="page-item ${active}" type="button" data-page="${page}" ${aria}>${page}</button>`
+        }
+
+        html += `<button class="page-item icon" type="button" data-page="${currentPage + 1}" aria-label="Página siguiente" ${nextDisabled}>›</button>`
+
+        paginationEl.innerHTML = html
+      }
+
+      function renderUsers(users = []) {
+        const actionButtons = actionButtonsFactory()
+
+        if (!users.length) {
+          tbody.innerHTML = '<tr><td colspan="5">No hay profesores registrados.</td></tr>'
+          renderPagination(0)
+          return
+        }
+
+        const totalPages = Math.max(1, Math.ceil(users.length / PAGE_SIZE))
+        if (currentPage > totalPages) currentPage = totalPages
+        const start = (currentPage - 1) * PAGE_SIZE
+        const pageUsers = users.slice(start, start + PAGE_SIZE)
+
+        const rows = pageUsers.map((user) => {
+          const roleId = Number(user.role_id)
+          const role = ROLE_LABELS[roleId] || `Rol ${roleId || 'N/D'}`
+          const name = [user.first_name, user.last_name].filter(Boolean).join(' ').trim() || 'Sin nombre'
+          const email = user.email || 'Sin correo'
+          const isActive = user.is_active ?? true
+
+          return `
+            <tr>
+              <td>${name}</td>
+              <td>${role}</td>
+              <td>${badge(isActive)}</td>
+              <td>${email}</td>
+              <td class="actions-cell">
+                ${actionButtons(user)}
+              </td>
+            </tr>
+          `
+        })
+
+        tbody.innerHTML = rows.join('')
+        renderPagination(totalPages)
+      }
+
+      function getDisplayName(user) {
+        const name = [user.first_name, user.last_name].filter(Boolean).join(' ').trim()
+        return name || user.email || `Profesor #${user.user_id}`
+      }
+
+      async function deleteUser(user) {
+        const nombre = getDisplayName(user)
+        const ok = window.confirm(`¿Estás seguro que quieres eliminar a "${nombre}"?`)
+        if (!ok) return
+        try {
+          const response = await fetch(`${API_BASE}/delete/${user.user_id}`, {
+            method: 'DELETE',
+            headers: { ...getAuthHeaders() }
+          })
+          if (!response.ok) {
+            const err = await response.json().catch(() => ({}))
+            throw new Error(err.error || 'No se pudo eliminar el profesor')
+          }
+          await loadUsers()
+        } catch (error) {
+          alert(error.message)
+          console.error('Error eliminando profesor:', error)
+        }
+      }
+
+      function attachActions() {
+        tbody.addEventListener('click', (event) => {
+          const btn = event.target.closest('button[data-action]')
+          if (!btn) return
+          const action = btn.dataset.action
+          const user = JSON.parse(decodeURIComponent(btn.dataset.user || '%7B%7D'))
+          if (action === 'delete') {
+            deleteUser(user)
+            return
+          }
+          openModal(user, action)
+        })
+      }
+
+      let allUsers = []
+      let filteredUsers = []
+      let currentPage = 1
+      let currentUser = null
+
+      function getAuthHeaders() {
+        const token = localStorage.getItem('sigra_token') || ''
+        return token ? { Authorization: `Bearer ${token}` } : {}
+      }
+
+      function getStoredUser() {
+        const raw = localStorage.getItem('sigra_user')
+        if (!raw) return null
+        try {
+          return JSON.parse(raw)
+        } catch (_) {
+          return null
+        }
+      }
+
+      function clearSessionStorage() {
+        localStorage.removeItem('sigra_token')
+        localStorage.removeItem('sigra_user')
+        localStorage.removeItem('sigra_user_raw')
+      }
+
+      async function logoutUser() {
+        const stored = getStoredUser()
+        const userId = stored?.id || stored?.user_id
+        try {
+          if (userId) {
+            const response = await fetch(`${API_BASE}/logout/${userId}`, {
+              method: 'POST',
+              headers: { ...getAuthHeaders() }
+            })
+
+            if (!response.ok) {
+              const err = await response.json().catch(() => ({}))
+              console.warn('No se pudo cerrar sesión en el backend:', err.error || response.statusText)
+            }
+          }
+        } catch (error) {
+          console.error('Error llamando a logout en backend:', error)
+        } finally {
+          clearSessionStorage()
+          window.location.href = '../access-control-I/login.html'
+        }
+      }
+
+      function setProfileUI() {
+        const user = getStoredUser()
+        const name = user ? `${user.first_name || ''} ${user.last_name || ''}`.trim() : ''
+        const initials = name
+          ? name
+            .split(' ')
+            .filter(Boolean)
+            .slice(0, 2)
+            .map((part) => part[0].toUpperCase())
+            .join('')
+          : '--'
+        if (profileAvatar) profileAvatar.textContent = initials || '--'
+        if (profileInfoName) profileInfoName.textContent = name || 'Usuario'
+      }
+
+      function applyFilter() {
+        const term = (document.getElementById('user-filter').value || '').toLowerCase()
+        filteredUsers = allUsers.filter((u) => {
+          const name = `${u.first_name || ''} ${u.last_name || ''}`.toLowerCase()
+          const email = (u.email || '').toLowerCase()
+          return name.includes(term) || email.includes(term)
+        })
+        currentPage = 1
+        renderUsers(filteredUsers)
+      }
+
+      async function loadUsers() {
+        try {
+          const response = await fetch(`${API_BASE}/users`)
+          if (!response.ok) throw new Error('No se pudo obtener usuarios')
+          const data = await response.json()
+          // Filtrar solo profesores (role_id === 2)
+          allUsers = (data.users || []).filter(user => Number(user.role_id) === TEACHER_ROLE_ID)
+          filteredUsers = allUsers
+          currentPage = 1
+          console.log('Profesores cargados:', allUsers)
+          renderUsers(filteredUsers)
+        } catch (error) {
+          tbody.innerHTML = `<tr><td colspan="5">${error.message}</td></tr>`
+          console.error('Error cargando profesores:', error)
+        } finally {
+          if (loadingRow) loadingRow.remove()
+        }
+      }
+
+      function openModal(user, mode = 'view') {
+        const modal = document.getElementById('user-modal')
+        const overlay = document.getElementById('user-modal-overlay')
+        const title = document.getElementById('user-modal-title')
+        const fields = ['first_name', 'last_name', 'email', 'phone', 'role_id', 'is_active']
+
+        currentUser = user
+
+        title.textContent = mode === 'edit' ? 'Editar profesor' : 'Ver profesor'
+
+        fields.forEach((field) => {
+          const input = document.getElementById(`modal-${field}`)
+          if (!input) return
+          const value = user[field]
+          if (input.type === 'checkbox') {
+            input.checked = Boolean(value ?? true)
+            input.disabled = mode === 'view'
+          } else if (input.tagName === 'SELECT') {
+            ensureRoleOption(input, value)
+            input.value = value ?? ''
+            const isAdmin = Number(value) === 1
+            const lockRoleChange = mode === 'edit' // No permitir cambiar entre profesor/estudiante al editar
+            input.disabled = mode === 'view' || isAdmin || lockRoleChange
+          } else {
+            input.value = value ?? ''
+            input.disabled = mode === 'view'
+          }
+        })
+
+        modal.dataset.mode = mode
+        modal.classList.add('open')
+        overlay.classList.add('open')
+      }
+
+      function closeModal() {
+        document.getElementById('user-modal').classList.remove('open')
+        document.getElementById('user-modal-overlay').classList.remove('open')
+      }
+
+      async function saveUser() {
+        const modal = document.getElementById('user-modal')
+        if (modal.dataset.mode !== 'edit' || !currentUser?.user_id) {
+          closeModal()
+          return
+        }
+
+        const payload = {
+          first_name: document.getElementById('modal-first_name').value.trim(),
+          last_name: document.getElementById('modal-last_name').value.trim(),
+          email: document.getElementById('modal-email').value.trim(),
+          phone: document.getElementById('modal-phone').value.trim(),
+          role_id: Number(document.getElementById('modal-role_id').value) || currentUser.role_id,
+          is_active: document.getElementById('modal-is_active').checked
+        }
+
+        const nombre = getDisplayName(currentUser)
+        const ok = window.confirm(`¿Estás seguro que quieres editar a "${nombre}"?`)
+        if (!ok) return
+
+        try {
+          const response = await fetch(`${API_BASE}/update/${currentUser.user_id}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              ...getAuthHeaders()
+            },
+            body: JSON.stringify(payload)
+          })
+
+          if (!response.ok) {
+            const err = await response.json().catch(() => ({}))
+            throw new Error(err.error || 'No se pudo actualizar el profesor')
+          }
+
+          await loadUsers()
+          closeModal()
+        } catch (error) {
+          alert(error.message)
+          console.error('Error al actualizar profesor:', error)
+        }
+      }
+
+      // Filtra la tabla en vivo al escribir en el buscador.
+      document.getElementById('user-filter').addEventListener('input', applyFilter)
+      document.getElementById('modal-close').addEventListener('click', closeModal)
+      document.getElementById('user-modal-overlay').addEventListener('click', closeModal)
+      document.getElementById('modal-save').addEventListener('click', saveUser)
+
+      const addUserBtn = document.getElementById('add-user-btn')
+      if (addUserBtn) {
+        addUserBtn.addEventListener('click', () => {
+          window.location.href = '../access-control-I/registro.html'
+        })
+      }
+
+      function toggleProfileDropdown(forceState) {
+        const isOpen = profileDropdown.classList.contains('open')
+        const nextState = forceState !== undefined ? forceState : !isOpen
+        profileDropdown.classList.toggle('open', nextState)
+        profileBtn.setAttribute('aria-expanded', nextState ? 'true' : 'false')
+      }
+
+      async function handleProfileAction(action) {
+        if (action === 'logout') {
+          await logoutUser()
+          return
+        }
+
+        if (action === 'create') {
+          window.location.href = '../access-control-I/registro.html'
+          return
+        }
+
+        if (action === 'edit') {
+          const stored = getStoredUser()
+          if (stored) {
+            openModal(stored, 'edit')
+          }
+        }
+      }
+
+      if (profileBtn) {
+        profileBtn.addEventListener('click', () => toggleProfileDropdown())
+      }
+
+      document.addEventListener('click', (evt) => {
+        if (!profileDropdown.contains(evt.target) && !profileBtn.contains(evt.target)) {
+          toggleProfileDropdown(false)
+        }
+      })
+
+      if (paginationEl) {
+        paginationEl.addEventListener('click', (evt) => {
+          const btn = evt.target.closest('[data-page]')
+          if (!btn || btn.disabled) return
+          const page = Number(btn.dataset.page)
+          if (Number.isNaN(page)) return
+
+          const totalPages = Math.max(1, Math.ceil((filteredUsers || []).length / PAGE_SIZE))
+          const nextPage = Math.min(Math.max(page, 1), totalPages)
+          if (nextPage === currentPage) return
+          currentPage = nextPage
+          renderUsers(filteredUsers)
+        })
+      }
+
+      profileDropdown.addEventListener('click', (evt) => {
+        const item = evt.target.closest('[data-profile-action]')
+        if (!item) return
+        const action = item.dataset.profileAction
+        handleProfileAction(action)
+        toggleProfileDropdown(false)
+      })
+
+      attachActions()
+      setProfileUI()
+      loadUsers()
+    })
+  </script>
+
+  <div id="user-modal-overlay" class="modal-overlay"></div>
+  <div id="user-modal" class="modal">
+    <div class="modal-header">
+      <h2 id="user-modal-title">Detalle de profesor</h2>
+      <button id="modal-close" type="button" aria-label="Cerrar" class="icon-link">✕</button>
+    </div>
+    <div class="modal-body">
+      <label>
+        Nombre
+        <input id="modal-first_name" type="text" />
+      </label>
+      <label>
+        Apellido
+        <input id="modal-last_name" type="text" />
+      </label>
+      <label>
+        Correo
+        <input id="modal-email" type="email" />
+      </label>
+      <label>
+        Teléfono
+        <input id="modal-phone" type="tel" />
+      </label>
+      <label>
+        Rol
+        <select id="modal-role_id">
+          <option value="2">Profesor</option>
+          <option value="3">Estudiante</option>
+          <option value="1" disabled>Administrador (solo lectura)</option>
+        </select>
+      </label>
+      <label class="switch-line">
+        <span>Activo</span>
+        <input id="modal-is_active" type="checkbox" />
+      </label>
+    </div>
+    <div class="modal-footer">
+      <button id="modal-save" type="button" class="primary-button">Guardar</button>
+    </div>
+  </div>
+</body>
+
+</html>

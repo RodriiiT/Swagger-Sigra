@@ -9,7 +9,7 @@ export class AssignmentModel {
             `SELECT u.user_id, CONCAT(u.first_name, ' ', u.last_name) AS name, u.email
              FROM users u
              JOIN roles r ON u.role_id = r.role_id
-             WHERE r.role_name = 'Estudiante'
+             WHERE r.role_name = 'student'
              AND u.user_id NOT IN (
                  SELECT e.student_user_id
                  FROM enrollments e
@@ -52,7 +52,7 @@ export class AssignmentModel {
             `SELECT u.user_id, CONCAT(u.first_name, ' ', u.last_name) AS name, u.email
              FROM users u
              JOIN roles r ON u.role_id = r.role_id
-             WHERE r.role_name = 'Docente'
+             WHERE r.role_name = 'teacher'
              AND u.user_id NOT IN (
                  SELECT ta.teacher_user_id
                  FROM teacher_assignments ta
@@ -63,6 +63,38 @@ export class AssignmentModel {
 
         return {
             message: 'Profesores no asignados obtenidos exitosamente',
+            teachers
+        };
+    }
+
+    // Obtener todos los profesores disponibles (no asignados a ninguna sección del año académico activo)
+    static async getAllTeachers(academicYearId) {
+        let query = `
+            SELECT u.user_id, CONCAT(u.first_name, ' ', u.last_name) AS name, u.email
+            FROM users u
+            JOIN roles r ON u.role_id = r.role_id
+            WHERE r.role_name = 'Docente'`;
+
+        const params = [];
+
+        // Si se proporciona academicYearId, filtrar profesores no asignados en ese año
+        if (academicYearId) {
+            query += `
+            AND u.user_id NOT IN (
+                SELECT DISTINCT ta.teacher_user_id
+                FROM teacher_assignments ta
+                JOIN sections s ON ta.section_id = s.section_id
+                WHERE s.academic_year_id = ?
+            )`;
+            params.push(academicYearId);
+        }
+
+        query += ` ORDER BY u.first_name, u.last_name`;
+
+        const [teachers] = await db.query(query, params);
+
+        return {
+            message: 'Profesores obtenidos exitosamente',
             teachers
         };
     }
@@ -112,7 +144,8 @@ export class AssignmentModel {
 
         return {
             message: 'Profesor asignado exitosamente',
-            assignment_id: result.insertId
+            assignment_id: result.insertId,
+            userId: teacher_user_id
         };
     }
 
@@ -127,6 +160,9 @@ export class AssignmentModel {
 
         if (result.affectedRows === 0) return { error: 'No se encontró la asignación' };
 
-        return { message: 'Asignación eliminada exitosamente' };
+        return { 
+            message: 'Asignación eliminada exitosamente',
+            teacher_user_id: result.teacher_user_id 
+        };
     }
 }

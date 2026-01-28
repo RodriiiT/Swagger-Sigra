@@ -8,6 +8,8 @@ export class SectionModel {
             `SELECT s.*, g.grade_name 
              FROM sections s
              JOIN grades g ON s.grade_id = g.grade_id
+             JOIN academic_years ay ON s.academic_year_id = ay.year_id
+             WHERE ay.is_active = 1
              ORDER BY s.grade_id ASC, s.section_name ASC`
         );
         if (sections.length === 0) return { error: 'No hay secciones registradas' };
@@ -21,10 +23,11 @@ export class SectionModel {
     static async getSectionsByGrade(gradeId) {
         if (!gradeId) return { error: 'El ID del grado es requerido' };
         const [sections] = await db.query(
-            `SELECT s.section_id, s.section_name, s.capacity, s.number_of_students, g.grade_name
+            `SELECT s.section_id, s.section_name, s.capacity, s.number_of_students, s.grade_id, g.grade_name
             FROM sections s
             JOIN grades g ON s.grade_id = g.grade_id
-            WHERE s.grade_id = ?
+            JOIN academic_years ay ON s.academic_year_id = ay.year_id
+            WHERE s.grade_id = ? AND ay.is_active = 1
             ORDER BY s.section_name ASC`,
             [gradeId]
         );

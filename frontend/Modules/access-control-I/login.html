@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -9,11 +10,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="login.css" />
 </head>
+
 <body>
   <main class="page">
     <header class="brand">
       <img class="brand-logo" src="../../Public/resources/Modulo-1/logo.png" alt="Logo SIGRA" />
-      <p class="brand-text"><span class="brand-accent">SIGRA:</span> Sistema Integral de Gestión y Registro Académico</p>
+      <p class="brand-text"><span class="brand-accent">SIGRA:</span> Sistema Integral de Gestión y Registro Académico
+      </p>
     </header>
 
     <h1 class="page-title">Inicio de Sesión</h1>
@@ -26,15 +29,17 @@
             <span class="input-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z" stroke="currentColor" stroke-width="1.5" />
-                <path d="M4 20.5c0-3.59 3.582-6.5 8-6.5s8 2.91 8 6.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                <path d="M4 20.5c0-3.59 3.582-6.5 8-6.5s8 2.91 8 6.5" stroke="currentColor" stroke-width="1.5"
+                  stroke-linecap="round" />
               </svg>
             </span>
-            <input id="usuario" name="usuario" type="email" placeholder="Ingresa tu correo" aria-label="Correo" autocomplete="email" />
+            <input id="usuario" name="usuario" type="email" placeholder="Ingresa tu correo" aria-label="Correo"
+              autocomplete="email" />
           </div>
           <p class="input-error" id="email-error" aria-live="polite"></p>
         </div>
 
-        <div class="input-group">
+        <div class="input-group" id="password-group">
           <label class="input-label" for="contrasena">Contraseña</label>
           <div class="input-control">
             <span class="input-icon" aria-hidden="true">
@@ -43,11 +48,13 @@
                 <path d="M8 10V7a4 4 0 1 1 8 0v3" stroke="currentColor" stroke-width="1.5" />
               </svg>
             </span>
-            <input id="contrasena" name="contrasena" type="password" placeholder="Ingresa tu contraseña" aria-label="Contraseña" autocomplete="current-password" />
-            
+            <input id="contrasena" name="contrasena" type="password" placeholder="Ingresa tu contraseña"
+              aria-label="Contraseña" autocomplete="current-password" />
+
             <button class="ghost-button toggle-password-btn" type="button" aria-label="Mostrar u ocultar contraseña">
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6Z" stroke="currentColor" stroke-width="1.5"
+                  stroke-linecap="round" stroke-linejoin="round" />
                 <circle cx="12" cy="12" r="2.5" stroke="currentColor" stroke-width="1.5" />
               </svg>
             </button>
@@ -56,17 +63,17 @@
         </div>
 
         <button class="primary-button" type="submit" id="login-button">Acceder</button>
-        
+
         <div class="secondary-links">
-          <a class="link-text" href="#">¿Olvidaste tu contraseña?</a>
-            
-        
+          <a class="link-text" href="#" id="forgot-password-link">¿Olvidaste tu contraseña?</a>
+          <a class="link-text" href="../landing/index.html">← Volver al inicio</a>
         </div>
 
       </form>
     </section>
 
     <footer class="footer">
+      <a href="../landing/index.html">Inicio</a>
       <a href="#">Ayuda</a>
       <a href="#">Términos de uso</a>
       <a href="#">Privacidad</a>
@@ -75,7 +82,7 @@
 
   <script>
     (function () {
-      const API_BASE = 'https://sigra-backend.onrender.com/api/auth'
+      const API_BASE = 'https://sigra.irissoftware.lat/api/auth'
       const form = document.querySelector('.form')
       const emailInput = document.getElementById('usuario')
       const passwordInput = document.getElementById('contrasena')
@@ -83,6 +90,9 @@
       const passwordError = document.getElementById('password-error')
       const loginButton = document.getElementById('login-button')
       const toggleBtn = document.querySelector('.toggle-password-btn')
+      const forgotPasswordLink = document.getElementById('forgot-password-link')
+      const passwordGroup = document.getElementById('password-group')
+      let isRecoverMode = false
 
       if (toggleBtn) {
         toggleBtn.addEventListener('click', () => {
@@ -100,6 +110,24 @@
       function clearErrors() {
         setError(emailError, '')
         setError(passwordError, '')
+      }
+
+      function setRecoverMode(enabled) {
+        isRecoverMode = enabled
+        clearErrors()
+        if (passwordGroup) {
+          passwordGroup.style.display = enabled ? 'none' : ''
+        }
+        if (loginButton) {
+          loginButton.textContent = enabled ? 'Consultar' : 'Acceder'
+        }
+        if (forgotPasswordLink) {
+          forgotPasswordLink.textContent = enabled ? 'Loguearse' : '¿Olvidaste tu contraseña?'
+        }
+        if (!enabled) {
+          passwordInput.value = ''
+        }
+        emailInput.focus()
       }
 
       async function login({ email, password }) {
@@ -121,6 +149,21 @@
         return data
       }
 
+      async function fetchUserByEmail(email) {
+        const response = await fetch(`${API_BASE}/email/${encodeURIComponent(email)}`)
+        let data
+        try {
+          data = await response.json()
+        } catch (_) {
+          data = null
+        }
+
+        if (response.status === 404) return { error: 'su usuario no existe' }
+        if (!response.ok) return { error: data?.error || data?.message || 'No se pudo consultar el usuario' }
+
+        return { user: Array.isArray(data.user) ? data.user[0] : data.user }
+      }
+
       form.addEventListener('submit', async (event) => {
         event.preventDefault()
         clearErrors()
@@ -130,6 +173,28 @@
 
         if (!email) {
           setError(emailError, 'Ingresa tu correo')
+          return
+        }
+
+        if (isRecoverMode) {
+          try {
+            const result = await fetchUserByEmail(email)
+
+            if (result.error) {
+              setError(emailError, result.error)
+              return
+            }
+
+            const roleId = Number(result.user?.role_id)
+            if (roleId === 3) {
+              setError(emailError, 'Comuniquese con control de estudios.')
+            } else {
+              setError(emailError, 'comuniquese con la administracion.')
+            }
+          } catch (error) {
+            setError(emailError, 'No se pudo conectar con el servidor')
+            console.error('Forgot password error:', error)
+          }
           return
         }
 
@@ -151,6 +216,17 @@
 
           const user = Array.isArray(result.user) ? result.user[0] : result.user
           const roleId = Number(user?.role_id)
+          // Si el usuario está inactivo, no permitir acceso y mostrar mensaje específico
+          if (user && user.is_active === false) {
+            if (roleId === 3) {
+              setError(passwordError, 'Su usuario esta inactivo, comuniquese con control de estudios.')
+            } else if (roleId === 2 || roleId === 4) {
+              setError(passwordError, 'Su usuario esta inactivo, comunique se con administracion')
+            } else {
+              setError(passwordError, 'Su usuario esta inactivo.')
+            }
+            return
+          }
           localStorage.setItem('sigra_user_raw', JSON.stringify(result.user))
 
           if (!user) {
@@ -162,30 +238,23 @@
             localStorage.setItem('sigra_token', result.token)
           }
 
-          // Guarda la respuesta completa del usuario que envía el backend
-          // para reutilizarla en otras vistas sin tener que volver a pedirla.
-          
 
-          // Guardamos datos básicos del usuario para usarlos en el navbar u otras vistas
-          const safeUser = {
-            id: user.user_id,
-            role_id: roleId,
-            first_name: user.first_name,
-            last_name: user.last_name,
-            email: user.email,
-            phone: user.phone
-          }
+          // Guardar todos los datos recibidos del usuario menos la contraseña
+          const { password_hash, ...safeUser } = user
           localStorage.setItem('sigra_user', JSON.stringify(safeUser))
 
           if (roleId === 1) {
             window.location.href = './user-table.html'
           } else if (roleId === 2) {
-            window.location.href = '../teaching-manager-IV/teacher.view.html'
+            window.location.href = '../teaching-manager-IV/profesor.html'
           } else if (roleId === 3) {
             window.location.href = '../academic-manager-III/views/manager.view.html'
+          } else if (roleId === 4) {
+            window.location.href = './user-table.html'
           } else {
             setError(passwordError, 'No tienes módulo asignado aún')
           }
+
         } catch (error) {
           setError(emailError, 'No se pudo conectar con el servidor')
           console.error('Login error:', error)
@@ -194,7 +263,18 @@
           loginButton.textContent = 'Acceder'
         }
       })
+
+      if (forgotPasswordLink) {
+        forgotPasswordLink.addEventListener('click', async (event) => {
+          event.preventDefault()
+          setRecoverMode(!isRecoverMode)
+        })
+      }
+
+      // Iniciar en modo login normal
+      setRecoverMode(false)
     })()
   </script>
 </body>
+
 </html>

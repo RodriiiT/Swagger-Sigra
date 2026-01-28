@@ -1,10 +1,16 @@
-// Allow overriding the API base in production to avoid hitting localhost from Vercel
-const API_URL = (typeof window !== 'undefined' && window.API_BASE_URL)
-  ? `${window.API_BASE_URL}/api/manager`
-  : 'http://localhost:3000/api/manager';
+const API_URL = 'https://sigra.irissoftware.lat/api/manager';
 
-const storedUser = JSON.parse(localStorage.getItem('sigra_user') || 'null');
-const STUDENT_ID = storedUser?.id || storedUser?.user_id;
+function getSessionUser() {
+    const raw = localStorage.getItem('sigra_user');
+    if (!raw) return null;
+    try {
+        const data = JSON.parse(raw);
+        return Array.isArray(data) ? data[0] : data;
+    } catch (e) { return null; }
+}
+
+const storedUser = getSessionUser();
+const STUDENT_ID = storedUser?.user_id || storedUser?.id;
 
 function getCourseImage(subjectName) {
   const name = subjectName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -37,6 +43,11 @@ function getCourseImage(subjectName) {
 }
 
 async function loadCourses() {
+  if (!STUDENT_ID) {
+      console.error("No se encontró ID de estudiante");
+      return;
+  }
+
   try {
     const response = await fetch(`${API_URL}/courses/${STUDENT_ID}`);
     const data = await response.json();
@@ -44,15 +55,13 @@ async function loadCourses() {
     if (data.success) {
       renderCourses(data.data);
     } else {
-      console.error('Error al cargar cursos:', data.message);
       document.querySelector('.cursosDisponibles').innerHTML = `<p>Error: ${data.message}</p>`;
     }
   } catch (error) {
     console.error('Error de conexión:', error);
-    document.querySelector('.cursosDisponibles').innerHTML = `<p>No se pudo conectar con el servidor.</p>`;
+    document.querySelector('.cursosDisponibles').innerHTML = `<p>Error al conectar con el servidor.</p>`;
   }
 }
-
 function renderCourses(courses) {
   const container = document.querySelector('.cursosDisponibles');
   container.innerHTML = ''; 

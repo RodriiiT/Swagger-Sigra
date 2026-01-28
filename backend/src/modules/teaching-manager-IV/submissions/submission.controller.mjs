@@ -21,6 +21,22 @@ export class SubmissionController {
         }
     }
 
+    // Controlador para obtener todas las entregas de una asignación
+    getSubmissionByAssignmentId = async (req, res) => {
+        const {assignmentId} = req.params;
+        try{
+            const result = await this.model.getSubmissionByAssignmentId(Number(assignmentId));
+            if(result.error) return res.status(404).json({error: result.error});
+            return res.status(200).json({
+                message: result.message,
+                submissions: result.submissions
+            });
+        }
+        catch(error){
+            return res.status(500).json({error: 'Error al obtener las entregas'});
+        }
+    }
+
     // Controlador para obtener una entrega por su ID
     getSubmissionById = async (req, res) => {
         const {submissionId} = req.params;
@@ -72,6 +88,11 @@ export class SubmissionController {
             }
             const result = await this.model.createSubmission(Data);
             if(result.error) return res.status(400).json({error: result.error});
+            res.locals.notify = {
+                userId: validation.data.student_user_id,
+                message: `Tu entrega para la actividad ${validation.data.activity_id} ha sido creada exitosamente.`,
+                type: 'notification'
+            };
             return res.status(201).json({
                 message: result.message,
                 submission: result.submission
@@ -115,6 +136,11 @@ export class SubmissionController {
         try{
             const result = await this.model.deleteSubmission(Number(submissionId));
             if(result.error) return res.status(400).json({error: result.error});
+            res.locals.notify = {
+                userId: result.student_user_id,
+                message: `Tu entrega para la actividad ${result.activity_id} ha sido eliminada exitosamente.`,
+                type: 'notification'
+            };
             return res.status(200).json({
                 message: result.message
             });

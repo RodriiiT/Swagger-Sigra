@@ -1,4 +1,3 @@
-import { is } from "zod/v4/locales";
 import { validateCreateUser, validateLoginUser, validateUpdateUser } from "./control.schema.mjs";
 
 // Controlador para la gestión de usuarios y control de acceso
@@ -15,6 +14,21 @@ export class ControlController {
 			return res.status(200).json({
 				message: result.message,
 				users: result.users
+			});
+		}
+		catch(error){
+			return res.status(500).json({error: 'Error del servidor'});
+		}
+	}
+
+	// Controlador para obtener todos los usuarios que sean estudiantes
+	getAllStudents = async (req, res) => {
+		try{
+			const result = await this.model.getAllStudents();
+			if(result.error) return res.status(404).json({error: result.error});
+			return res.status(200).json({
+				message: result.message,
+				students: result.students
 			});
 		}
 		catch(error){
@@ -43,6 +57,22 @@ export class ControlController {
 		const { email } = req.params;
 		try{
 			const result = await this.model.getUserByEmail(email);
+			if(result.error) return res.status(404).json({error: result.error});
+			return res.status(200).json({
+				message: result.message,
+				user: result.user
+			});
+		}
+		catch(error){
+			return res.status(500).json({error: 'Error del servidor'});
+		}
+	}
+
+	// Controlador para obtener un usuario por su national_id
+	getUserByNationalId = async (req, res) => {
+		const { nationalId } = req.params;
+		try{
+			const result = await this.model.getUserByNationalId(nationalId);
 			if(result.error) return res.status(404).json({error: result.error});
 			return res.status(200).json({
 				message: result.message,
@@ -112,7 +142,12 @@ export class ControlController {
 					details: validation.error
 				});
 			}
-			const result = await this.model.updateUser(userId, validation.data);
+			const payload = { ...validation.data };
+			if(payload.password && !payload.password_hash){
+				payload.password_hash = payload.password;
+			}
+			delete payload.password;
+			const result = await this.model.updateUser(userId, payload);
 			if(result.error) return res.status(400).json({error: result.error});
 			return res.status(200).json({
 				message: result.message,

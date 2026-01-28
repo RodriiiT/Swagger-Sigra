@@ -9,16 +9,16 @@ const controller = new ControlController({ ModelControl: UserModel });
 /**
  * @openapi
  * tags:
- *   name: Módulo I - Auth & Users
- *   description: Gestión de usuarios, sesiones y autenticación
+ *   name: Módulo I - Access Control
+ *   description: Gestión de usuarios y autenticación
  */
 
 /**
  * @openapi
- * /api/auth/users:
+ * /api/control/users:
  *   get:
- *     tags: [Módulo I - Auth & Users]
- *     summary: Obtener todos los usuarios registrados
+ *     tags: [Módulo I - Access Control]
+ *     summary: Obtener todos los usuarios
  *     responses:
  *       200:
  *         description: Lista de usuarios
@@ -27,9 +27,9 @@ router.get('/users', controller.getAllUsers);
 
 /**
  * @openapi
- * /api/auth/user/{userId}:
+ * /api/control/user/{userId}:
  *   get:
- *     tags: [Módulo I - Auth & Users]
+ *     tags: [Módulo I - Access Control]
  *     summary: Obtener un usuario por ID
  *     parameters:
  *       - in: path
@@ -38,16 +38,28 @@ router.get('/users', controller.getAllUsers);
  *         schema: { type: integer }
  *     responses:
  *       200:
- *         description: Datos del usuario obtenidos
+ *         description: Usuario encontrado
  */
 router.get('/user/:userId', controller.getUserById);
 
 /**
  * @openapi
- * /api/auth/email/{email}:
+ * /api/control/students:
  *   get:
- *     tags: [Módulo I - Auth & Users]
- *     summary: Buscar un usuario por email
+ *     tags: [Módulo I - Access Control]
+ *     summary: Obtener todos los usuarios que sean estudiantes
+ *     responses:
+ *       200:
+ *         description: Lista de estudiantes
+ */
+router.get('/students', controller.getAllStudents);
+
+/**
+ * @openapi
+ * /api/control/email/{email}:
+ *   get:
+ *     tags: [Módulo I - Access Control]
+ *     summary: Obtener un usuario por email
  *     parameters:
  *       - in: path
  *         name: email
@@ -61,10 +73,10 @@ router.get('/email/:email', controller.getUserByEmail);
 
 /**
  * @openapi
- * /api/auth/register:
+ * /api/control/register:
  *   post:
- *     tags: [Módulo I - Auth & Users]
- *     summary: Registrar un nuevo usuario
+ *     tags: [Módulo I - Access Control]
+ *     summary: Crear un nuevo usuario
  *     requestBody:
  *       required: true
  *       content:
@@ -72,24 +84,22 @@ router.get('/email/:email', controller.getUserByEmail);
  *           schema:
  *             type: object
  *             properties:
- *               role_id: { type: integer }
- *               first_name: { type: string }
- *               last_name: { type: string }
- *               email: { type: string }
- *               phone: { type: string }
- *               password_hash: { type: string }
+ *               name: { type: string, example: "Juan Pérez" }
+ *               email: { type: string, example: "juan@mail.com" }
+ *               password: { type: string, example: "123456" }
+ *               role: { type: string, example: "student" }
  *     responses:
  *       201:
- *         description: Usuario creado con éxito
+ *         description: Usuario creado
  */
 router.post('/register', controller.createdUser);
 
 /**
  * @openapi
- * /api/auth/login:
+ * /api/control/login:
  *   post:
- *     tags: [Módulo I - Auth & Users]
- *     summary: Iniciar sesión
+ *     tags: [Módulo I - Access Control]
+ *     summary: Login de usuario
  *     requestBody:
  *       required: true
  *       content:
@@ -97,20 +107,22 @@ router.post('/register', controller.createdUser);
  *           schema:
  *             type: object
  *             properties:
- *               email: { type: string }
- *               password_hash: { type: string }
+ *               email: { type: string, example: "juan@mail.com" }
+ *               password: { type: string, example: "123456" }
  *     responses:
  *       200:
- *         description: Login exitoso, devuelve token
+ *         description: Login exitoso
+ *       401:
+ *         description: Credenciales inválidas
  */
 router.post('/login', controller.LoginUser);
 
 /**
  * @openapi
- * /api/auth/logout/{userId}:
+ * /api/control/logout/{userId}:
  *   post:
- *     tags: [Módulo I - Auth & Users]
- *     summary: Cerrar sesión de un usuario
+ *     tags: [Módulo I - Access Control]
+ *     summary: Logout de usuario
  *     parameters:
  *       - in: path
  *         name: userId
@@ -118,21 +130,31 @@ router.post('/login', controller.LoginUser);
  *         schema: { type: integer }
  *     responses:
  *       200:
- *         description: Sesión cerrada
+ *         description: Logout exitoso
  */
 router.post('/logout/:userId', controller.LogoutUser);
 
 /**
  * @openapi
- * /api/auth/update/{userId}:
+ * /api/control/update/{userId}:
  *   patch:
- *     tags: [Módulo I - Auth & Users]
- *     summary: Actualizar datos de un usuario
+ *     tags: [Módulo I - Access Control]
+ *     summary: Actualizar un usuario
  *     parameters:
  *       - in: path
  *         name: userId
  *         required: true
  *         schema: { type: integer }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name: { type: string }
+ *               email: { type: string }
+ *               role: { type: string }
  *     responses:
  *       200:
  *         description: Usuario actualizado
@@ -141,9 +163,9 @@ router.patch('/update/:userId', controller.updateUser);
 
 /**
  * @openapi
- * /api/auth/delete/{userId}:
+ * /api/control/delete/{userId}:
  *   delete:
- *     tags: [Módulo I - Auth & Users]
+ *     tags: [Módulo I - Access Control]
  *     summary: Eliminar un usuario
  *     parameters:
  *       - in: path
@@ -158,15 +180,15 @@ router.delete('/delete/:userId', controller.deleteUser);
 
 /**
  * @openapi
- * /api/auth/verify-auth:
+ * /api/control/verify-auth:
  *   get:
- *     tags: [Módulo I - Auth & Users]
- *     summary: Verificar ticket de sesión (JWT)
- *     security:
- *       - bearerAuth: []
+ *     tags: [Módulo I - Access Control]
+ *     summary: Verificar si el usuario está autenticado
  *     responses:
  *       200:
- *         description: Autenticado
+ *         description: Usuario autenticado
+ *       401:
+ *         description: No autenticado
  */
 router.get('/verify-auth', authMiddleware, controller.verifyAuth);
 

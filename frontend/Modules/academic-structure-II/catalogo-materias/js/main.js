@@ -3,7 +3,7 @@
 // ==========================================
 
 const viewContainer = document.getElementById('view-container');
-const API_BASE = 'https://sigra-backend.onrender.com/api/subjects';  // Cambiar si es necesario
+const API_BASE = 'https://sigra.irissoftware.lat/api/subjects'; // Puerto correcto del backend
 
 let materias = []; // Array global para las materias
 let currentPage = 1;

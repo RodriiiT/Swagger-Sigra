@@ -1,5 +1,5 @@
 // Configuración API y orden de días
-const API_URL = 'http://localhost:3000/api/manager';
+const API_URL = 'https://sigra.irissoftware.lat/api/manager';
 const storedUser = JSON.parse(localStorage.getItem('sigra_user') || 'null');
 const STUDENT_ID = storedUser?.id || storedUser?.user_id;
 const dayOrder = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];

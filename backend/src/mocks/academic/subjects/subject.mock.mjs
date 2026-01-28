@@ -94,7 +94,7 @@ export const subjectsMock = [
 	{
 		code_subject: "ING-601",
 		subject_name: "Ingles I",
-		grade_id: "1",
+		grade_id: 1,
 		subject_id: 11,
 		description:
 			"Inglés básico: vocabulario elemental, verbos to be y presente simple.",

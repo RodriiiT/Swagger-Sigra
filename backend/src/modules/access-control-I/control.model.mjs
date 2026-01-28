@@ -16,6 +16,18 @@ export class UserModel {
 			users: users
 		}
 	}
+
+	// Método para obtener todos los usaurios que sea estudiantes
+	static async getAllStudents(){
+		const [students] = await db.query(
+			`SELECT CONCAT(first_name, ' ', last_name) AS full_name FROM users u JOIN roles r ON u.role_id = r.role_id WHERE r.role_name = 'student'`
+		);
+		if(students.length === 0) return {error: 'No hay estudiantes registrados'};
+		return {
+			message: 'Estudiantes obtenidos correctamente',
+			students: students
+		}
+	}
 	
 	// Método para obtener un usuario por su ID
 	static async getUserById(userId) {
@@ -45,6 +57,20 @@ export class UserModel {
 		}
 	}
 
+	// Método para obtener un usuario por su national_id
+	static async getUserByNationalId(nationalId){
+		if(!nationalId) return {error: 'El national_id es requerido'};
+		const [user] = await db.query(
+			`SELECT * FROM users WHERE national_id = ?`,
+			[nationalId]
+		);
+		if(user.length === 0) return {error: 'Usuario no encontrado'};
+		return {
+			message: 'Usuario obtenido correctamente',
+			user: user
+		}
+	}
+
 	// Método para crear un nuevo usuario
 	static async createUser(data){
 		if(!data) return {error: 'Faltan datos para crear el usuario'};
@@ -59,15 +85,31 @@ export class UserModel {
 			`SELECT * FROM users WHERE email = ?`,
 			[rest.email]
 		);
-		if(!existingRole.length || existingEmail.length > 0){
-			return {error: 'Rol no encontrado o email ya existe'};
+		// Verificar si ya existe un usuario con el mismo national_id
+		const [existingNationalId] = await db.query(
+			`SELECT user_id FROM users WHERE national_id = ?`,
+			[rest.national_id]
+		);
+		if(!existingRole.length || existingEmail.length > 0 || existingNationalId.length > 0){
+			return {error: 'Rol no encontrado, email ya existe o national_id ya existe'};
 		}
 		// Si todo esta bien, se crea el usuario, se hashea la contraseña
 		const hashedPassword = await bcrypt.hash(rest.password_hash, 10);
 		const [result] = await db.query(
-			`INSERT INTO users (role_id, first_name, last_name, email, phone, password_hash)
-			VALUES (?, ?, ?, ?, ?, ?)`,
-			[role_id, rest.first_name, rest.last_name, rest.email, rest.phone, hashedPassword]
+			`INSERT INTO users (role_id, national_id, first_name, last_name, email, phone, password_hash, parents_national_id, parents_first_name, parents_last_name)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			[
+				role_id,
+				rest.national_id,
+				rest.first_name,
+				rest.last_name,
+				rest.email,
+				rest.phone,
+				hashedPassword,
+				rest.parents_national_id ?? null,
+				rest.parents_first_name ?? null,
+				rest.parents_last_name ?? null
+			]
 		);
 		// Se obtiene el usuario creado
 		const [createdUser] = await db.query(
@@ -162,11 +204,21 @@ export class UserModel {
 	static async updateUser(userId, data){
 		if(!userId || !data) return {error: 'Faltan datos para actualizar el usuario'};
 		// Se asigna los campos que se van a actualizar
-		const allowedFields = ['role_id', 'first_name', 'last_name', 'email', 'phone', 'password_hash', 'is_active'];
+		const allowedFields = ['role_id', 'national_id', 'first_name', 'last_name', 'email', 'phone', 'password_hash', 'is_active', 'parents_national_id', 'parents_first_name', 'parents_last_name'];
 		const updateToFields = {};
 		for(const field of allowedFields){
 			if(data[field] !== undefined){
 				updateToFields[field] = data[field];
+			}
+		}
+		// Si se actualiza national_id, verificar que no exista en otro usuario
+		if(updateToFields.national_id){
+			const [existingNationalId] = await db.query(
+				`SELECT user_id FROM users WHERE national_id = ? AND user_id <> ?`,
+				[updateToFields.national_id, userId]
+			);
+			if(existingNationalId.length > 0){
+				return {error: 'national_id ya existe en otro usuario'};
 			}
 		}
 		// Si se va a actualizar la contraseña, se hashea

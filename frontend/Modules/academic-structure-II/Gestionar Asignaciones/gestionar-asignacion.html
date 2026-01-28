@@ -60,16 +60,17 @@
     class="bg-background-light dark:bg-background-dark font-display text-text-main-light dark:text-text-main-dark antialiased min-h-screen flex flex-col transition-colors duration-200">
     <header>
         <nav class="navbar" aria-label="Barra de navegación principal">
-            <a class="brand" aria-label="SIGRA" href="../../access-control-I/user-table.html">
+            <a class="brand" aria-label="SIGRA" href="../../landing/index.html">
                 <img class="brand-logo" src="../../../Public/resources/Modulo-1/logo.png" alt="Logo SIGRA" />
                 <span>SIGRA</span>
             </a>
 
             <div class="nav-links" role="list">
-                <a href="../../access-control-I/user-table.html" role="listitem">Inicio</a>
+                <a href="../../landing/index.html" role="listitem">Inicio</a>
                 <a href="../catalogo-materias/index.html" role="listitem">Catalogo</a>
                 <a href="../gestion-materias/index.html" role="listitem">Materias</a>
                 <a href="../definicion-prelaciones/index.html" role="listitem">Prelaciones</a>
+                <a href="../gestion-horarios/index.html" role="listitem">Horarios</a>
                 <a href="../Gestionar Asignaciones/index.html" role="listitem"> Inscripción</a>
                 <a class="active" href="../Gestionar Asignaciones/gestionar-asignacion.html"
                     role="listitem">Asignacion</a>
@@ -226,7 +227,7 @@
     </style>
 
     <script>
-        const API_BASE = 'http://localhost:3000/api';
+        const API_BASE = 'https://sigra.irissoftware.lat/api';
         let currentSectionId = null;
         let currentAcademicYearId = null;
         let currentGradeId = null;
@@ -433,7 +434,7 @@
             }
         }
 
-        function openSubjectModal() {
+        async function openSubjectModal() {
             const modal = document.getElementById('subjectModal');
             const list = document.getElementById('subjectList');
             modal.classList.remove('hidden');
@@ -441,7 +442,7 @@
 
             list.innerHTML = '<p class="text-center text-gray-400 py-4">Cargando materias...</p>';
 
-            fetch(`${API_BASE}/subjects/grade/${currentGradeId}`)
+            await fetch(`${API_BASE}/subjects/grade/${currentGradeId}`)
                 .then(res => res.json())
                 .then(data => {
                     list.innerHTML = '';

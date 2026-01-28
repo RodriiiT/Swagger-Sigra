@@ -11,6 +11,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
         rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
     <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
@@ -52,16 +53,17 @@
     class="bg-background-light dark:bg-background-dark font-display text-text-main antialiased min-h-screen flex flex-col">
     <header>
         <nav class="navbar" aria-label="Barra de navegación principal">
-            <a class="brand" aria-label="SIGRA" href="../../access-control-I/user-table.html">
+            <a class="brand" aria-label="SIGRA" href="../../landing/index.html">
                 <img class="brand-logo" src="../../../Public/resources/Modulo-1/logo.png" alt="Logo SIGRA" />
                 <span>SIGRA</span>
             </a>
 
             <div class="nav-links" role="list">
-                <a href="../../access-control-I/user-table.html" role="listitem">Inicio</a>
+                <a href="../../landing/index.html" role="listitem">Inicio</a>
                 <a href="../catalogo-materias/index.html" role="listitem">Catalogo</a>
                 <a href="../gestion-materias/index.html" role="listitem">Materias</a>
                 <a class="active" href="../definicion-prelaciones/index.html" role="listitem">Prelaciones</a>
+                <a href="../gestion-horarios/index.html" role="listitem">Horarios</a>
                 <a href="../Gestionar Asignaciones/index.html" role="listitem"> Inscripción</a>
                 <a href="../Gestionar Asignaciones/gestionar-asignacion.html" role="listitem">Asignacion</a>
             </div>
@@ -108,13 +110,21 @@
 
                 <div class="form-group">
                     <label>1. Seleccionar Materia Principal</label>
-                    <div class="search-input-group">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" id="materia-search"
-                            placeholder="Buscar por código o nombre (ej. MAT-204, Matematica I)" list="materias-list">
-                        <datalist id="materias-list">
-                            <!-- Se llenará dinámicamente desde la base de datos -->
-                        </datalist>
+                    <div class="autocomplete-wrapper">
+                        <div class="search-input-group">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="materia-search"
+                                placeholder="Buscar por código o nombre (ej. MAT-204, Matematica I)" autocomplete="off">
+                        </div>
+                        <div class="autocomplete-dropdown" id="autocomplete-dropdown">
+                            <div class="autocomplete-header">
+                                <i class="fa-solid fa-book"></i>
+                                Materias Disponibles
+                            </div>
+                            <div id="autocomplete-results">
+                                <!-- Los resultados se cargarán dinámicamente -->
+                            </div>
+                        </div>
                     </div>
 
                     <div class="selected-item" id="selected-materia-container" style="display: none;">
