@@ -462,7 +462,9 @@ async function cargarEntregasParaCalificar(){
             const studentName = s.full_name || s.student_name || '';
             const title = s.title || '';
             const fileName = s.file_path || s.file_path_or_url || '';
-            const fileUrl = fileName ? `${API_URL.replace('/api','')}/uploads/submissions/${fileName.split('\\').pop()}` : '';
+            const cleanFileName = fileName ? fileName.split(/[\\/]/).pop() : '';
+            const baseUrl = API_URL.replace('/api', '');
+            const fileUrl = cleanFileName ? `${baseUrl}/uploads/submissions/${cleanFileName}` : '';
             // mostrar solo la fecha (sin hora)
             const submissionDate = s.submission_date ? new Date(s.submission_date).toLocaleDateString() : (s.created_at ? new Date(s.created_at).toLocaleDateString() : '-');
             const score = (s.numeric_score !== undefined && s.numeric_score !== null) ? s.numeric_score : (s.grade_name || '-');
