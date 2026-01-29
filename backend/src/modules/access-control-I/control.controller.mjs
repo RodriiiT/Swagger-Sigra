@@ -86,12 +86,28 @@ export class ControlController {
 
 	// Controlador para crear un nuevo usuario
 	createdUser = async (req, res) => {
-		const validation = validateCreateUser(req.body);
+		const rawBody = req.body || {};
+		const normalizedBody = {
+			...rawBody,
+			national_id: rawBody.national_id ?? rawBody.nationalId ?? rawBody.cedula,
+			parents_national_id:
+				rawBody.parents_national_id ?? rawBody.parentsNationalId ?? rawBody.repNationalId,
+			parents_first_name:
+				rawBody.parents_first_name ?? rawBody.parentsFirstName ?? rawBody.repFirstName,
+			parents_last_name:
+				rawBody.parents_last_name ?? rawBody.parentsLastName ?? rawBody.repLastName
+		};
+		const validation = validateCreateUser(normalizedBody);
 		try{
 			if(!validation.success){
 				return res.status(400).json({
 					error: 'Datos inválidos',
 					details: validation.error
+				});
+			}
+			if(!validation.data?.national_id){
+				return res.status(400).json({
+					error: 'national_id es requerido'
 				});
 			}
 			const result = await this.model.createUser(validation.data);
