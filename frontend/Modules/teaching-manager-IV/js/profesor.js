@@ -60,8 +60,18 @@ async function cargarMaterialApoyo() {
         const contenedor = document.getElementById('lista-recursos'); 
         if (!contenedor) return;
         contenedor.innerHTML = '';
-        if (data.resources && data.resources.length > 0) {
-            contenedor.innerHTML = data.resources.map(r => `
+         if (data.resources && data.resources.length > 0) {
+            contenedor.innerHTML = data.resources.map(r => {
+                // 1. Extraemos el nombre del archivo sin importar si viene con \ o /
+                const fileName = r.file_path_or_url.split(/[\\/]/).pop();
+                
+                // 2. Construimos la URL limpia
+                const finalUrl = `https://sigra.irissoftware.lat/uploads/resources/${fileName}`;
+                
+                // 3. Definimos el icono según el tipo
+                const iconClass = r.resource_type === 'PDF' ? 'fa-file-pdf' : 'fa-link';
+
+                return `
                 <div class="card" style="padding:15px; text-align:center; border:1px solid #eee; border-radius:12px; position:relative; min-height:180px;">
                     
                     <div style="position:absolute; top:10px; right:10px; display:flex; gap:8px;">
@@ -75,16 +85,17 @@ async function cargarMaterialApoyo() {
                         </button>
                     </div>
 
-                    <i class="fas ${r.resource_type === 'PDF' ? 'fa-file-pdf' : 'fa-link'}" style="font-size: 2em; color: #123E6A; margin-top:10px;"></i>
+                    <i class="fas ${iconClass}" style="font-size: 2em; color: #123E6A; margin-top:10px;"></i>
                     <h4 style="margin:10px 0; font-size:1rem;">${r.title}</h4>
                     <p style="font-size:0.75em; color:#666; margin-bottom:10px;">Tipo: ${r.resource_type}</p>
                     
-                    <a href="https://sigra.irissoftware.lat/uploads/resources/${r.file_path_or_url.split('\\').pop()}" target="_blank" 
+                    <a href="${finalUrl}" target="_blank" 
                        class="btn-primario" style="text-decoration:none; display:inline-block; font-size:0.85rem; padding:5px 10px; background:#123E6A; color:white; border-radius:5px;">
                         <i class="fas fa-external-link-alt"></i> Ver Recurso
                     </a>
                 </div>
-            `).join('');
+                `;
+            }).join('');
         } else {
             contenedor.innerHTML = '<p style="grid-column: 1/-1; text-align:center;">No hay materiales subidos para esta materia.</p>';
         }
