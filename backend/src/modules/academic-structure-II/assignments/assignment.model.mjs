@@ -73,7 +73,7 @@ export class AssignmentModel {
             SELECT u.user_id, CONCAT(u.first_name, ' ', u.last_name) AS name, u.email
             FROM users u
             JOIN roles r ON u.role_id = r.role_id
-            WHERE r.role_name = 'Docente'`;
+            WHERE r.role_name = 'teacher'`;
 
         const params = [];
 
