@@ -75,6 +75,8 @@ export class UserModel {
 	static async createUser(data){
 		if(!data) return {error: 'Faltan datos para crear el usuario'};
 		const {role_id, ...rest}  = data;
+		const nationalId = String(rest.national_id ?? '').trim();
+		if(!nationalId) return {error: 'national_id es requerido'};
 		// Se verifica si el rol existe
 		const [existingRole] = await db.query(
 			`SELECT * FROM roles WHERE role_id = ?`,
@@ -88,7 +90,7 @@ export class UserModel {
 		// Verificar si ya existe un usuario con el mismo national_id
 		const [existingNationalId] = await db.query(
 			`SELECT user_id FROM users WHERE national_id = ?`,
-			[rest.national_id]
+			[nationalId]
 		);
 		if(!existingRole.length || existingEmail.length > 0 || existingNationalId.length > 0){
 			return {error: 'Rol no encontrado, email ya existe o national_id ya existe'};
@@ -100,7 +102,7 @@ export class UserModel {
 			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 			[
 				role_id,
-				rest.national_id,
+				nationalId,
 				rest.first_name,
 				rest.last_name,
 				rest.email,
