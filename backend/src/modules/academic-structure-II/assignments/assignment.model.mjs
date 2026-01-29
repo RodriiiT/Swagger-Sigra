@@ -152,7 +152,12 @@ export class AssignmentModel {
     // Desasignar un profesor
     static async unassignTeacher(assignmentId) {
         if (!assignmentId) return { error: 'ID de asignación requerido' };
-
+        // Se verifica si la asignación existe
+        const [existingAssignment] = await db.query(
+            `SELECT * FROM teacher_assignments WHERE assignment_id = ?`,
+            [assignmentId]
+        );
+        if (existingAssignment.length === 0) return { error: 'La asignación especificada no existe.' };
         const [result] = await db.query(
             `DELETE FROM teacher_assignments WHERE assignment_id = ?`,
             [assignmentId]
@@ -162,7 +167,7 @@ export class AssignmentModel {
 
         return { 
             message: 'Asignación eliminada exitosamente',
-            teacher_user_id: result.teacher_user_id 
+            userId: existingAssignment[0].teacher_user_id
         };
     }
 }

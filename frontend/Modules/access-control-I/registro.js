@@ -151,7 +151,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            // Validación: cédula del usuario (exactamente 8 dígitos)
+            // Validación: cédula del usuario (exactamente 7 dígitos)
             if (!/^[0-9]{8}$/.test(digitsOnlyNationalId)) {
                 alert('La cédula del usuario debe tener exactamente 8 dígitos.');
                 return;
@@ -189,9 +189,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     alert('Completa todos los datos del representante.');
                     return;
                 }
-                // Validación: cédula del representante (exactamente 8 dígitos)
-                if (!/^[0-9]{8}$/.test(digitsOnlyRepNationalId)) {
-                    alert('La cédula del representante debe tener exactamente 8 dígitos.');
+                // Validación: cédula del representante (exactamente 7 dígitos)
+                if (!/^[0-9]{7}$/.test(digitsOnlyRepNationalId)) {
+                    alert('La cédula del representante debe tener exactamente 7 dígitos.');
                     return;
                 }
             }

@@ -43,9 +43,9 @@ CREATE TABLE users (
     email VARCHAR(150) NOT NULL UNIQUE,
     phone VARCHAR(12) NOT NULL,
     password_hash VARCHAR(255) NOT NULL, -- Almacenar hash, nunca texto plano
-    national_parent_id INT,
-    first_name_parent VARCHAR(100),
-    last_name_parent VARCHAR(100),
+    parents_national_id VARCHAR(20),
+    parents_first_name VARCHAR(100),
+    parents_last_name VARCHAR(100),
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

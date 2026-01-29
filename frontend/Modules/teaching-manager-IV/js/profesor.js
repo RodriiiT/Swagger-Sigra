@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (nameLabel) nameLabel.textContent = `${user.first_name} ${user.last_name}`;
 
     try {
-        const res = await fetch(`${API_URL}/assignments/teacher/${user.id}/courses`);
+        const res = await fetch(`${API_URL}/assignments/teacher/${user.user_id}/courses`);
         const data = await res.json();
 
         if (res.ok && data.courses && data.courses.length > 0) {

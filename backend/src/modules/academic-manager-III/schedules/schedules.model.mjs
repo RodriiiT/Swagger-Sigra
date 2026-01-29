@@ -92,12 +92,15 @@ export class SchedulesModel {
         );
         // Se retorna el nuevo horario creado
         const [newSchedule] = await db.query(
-            `SELECT * FROM schedules WHERE schedule_id = ?`,
+            `SELECT sch.*, ta.teacher_user_id FROM schedules sch
+            JOIN teacher_assignments ta ON sch.assignment_id = ta.assignment_id
+            WHERE sch.schedule_id = ?`,
             [result.insertId]
         );
         return {
             message: 'Horario creado exitosamente.',
-            schedule: newSchedule[0]
+            schedule: newSchedule[0],
+            teacher_user_id: newSchedule[0].teacher_user_id
         };
     }
 
@@ -161,7 +164,9 @@ export class SchedulesModel {
         if (!scheduleId) return { error: 'El ID del horario es requerido.' };
         // Se verifica si el horario existe
         const [existingSchedule] = await db.query(
-            `SELECT * FROM schedules WHERE schedule_id = ?`,
+            `SELECT sch.*, ta.teacher_user_id FROM schedules sch
+            JOIN teacher_assignments ta ON sch.assignment_id = ta.assignment_id
+            WHERE sch.schedule_id = ?`,
             [scheduleId]
         );
         if (existingSchedule.length === 0) return { error: 'El horario especificado no existe.' };
@@ -171,7 +176,8 @@ export class SchedulesModel {
             [scheduleId]
         );
         return {
-            message: 'Horario eliminado exitosamente.'
+            message: 'Horario eliminado exitosamente.',
+            teacher_user_id: existingSchedule[0].teacher_user_id
         };
     }
 }

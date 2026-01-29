@@ -52,6 +52,11 @@ export class SchedulesController {
             }
             const result = await this.ModelSchedules.createSchedule(validation.data);
             if(result.error) return res.status(400).json({error: result.error});
+            res.locals.notify = {
+                userId: result.teacher_user_id,
+                message: `Se ha creado un nuevo horario que te ha sido asignado.`,
+                type: 'notification'
+            }
             return res.status(201).json({
                 message: result.message,
                 schedule: result.schedule
@@ -93,6 +98,11 @@ export class SchedulesController {
         try{
             const result = await this.ModelSchedules.deleteSchedule(scheduleId);
             if(result.error) return res.status(404).json({error: result.error});
+            res.locals.notify = {
+                userId: result.teacher_user_id,
+                message: `Se ha eliminado un horario que te había sido asignado.`,
+                type: 'notification'
+            }
             return res.status(200).json({message: result.message});
         }
         catch(error){
