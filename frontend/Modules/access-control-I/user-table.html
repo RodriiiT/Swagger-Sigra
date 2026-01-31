@@ -30,9 +30,11 @@
         <div class="profile-dropdown" id="profile-dropdown" role="menu">
           <ul class="profile-list" role="menu">
             <li class="profile-info" id="profile-info-name" role="presentation">Usuario</li>
-            
-            <li role="none"><button type="button" class="profile-item" data-profile-action="view" role="menuitem">Ver usuario</button></li>
-            <li role="none"><button type="button" class="profile-item" data-profile-action="edit" role="menuitem">Editar usuario</button></li>
+
+            <li role="none"><button type="button" class="profile-item" data-profile-action="view" role="menuitem">Ver
+                usuario</button></li>
+            <li role="none"><button type="button" class="profile-item" data-profile-action="edit" role="menuitem">Editar
+                usuario</button></li>
             <li role="none"><button type="button" class="profile-item" data-profile-action="logout"
                 role="menuitem">Cerrar sesión</button></li>
           </ul>
@@ -96,7 +98,7 @@
   </main>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const API_BASE = 'https://sigra.irissoftware.lat/api/auth'
+      const API_BASE = 'http://localhost:3000/api/auth'
       const tbody = document.getElementById('users-body')
       const loadingRow = document.getElementById('users-loading')
       const profileBtn = document.getElementById('profile-button')
@@ -499,7 +501,7 @@
             repLastTop.value = ''
           }
         }
-        
+
         // La contraseña no se prellena por seguridad; habilitada solo en edición
         const pwdInput = document.getElementById('modal-password')
         if (pwdInput) {
@@ -665,8 +667,7 @@
             '<a href="../academic-structure-II/gestion-materias/index.html" role="listitem">Materias</a>',
             '<a href="../academic-structure-II/definicion-prelaciones/index.html" role="listitem">Prelaciones</a>',
             '<a href="../academic-structure-II/gestion-horarios/index.html" role="listitem">Horarios</a>',
-            '<a href="../academic-structure-II/Gestionar Asignaciones/index.html" role="listitem">Inscripción</a>',
-            '<a href="../academic-structure-II/Gestionar Asignaciones/gestionar-asignacion.html" role="listitem">Gestionar Asignación</a>'
+            '<a href="../academic-structure-II/Gestionar%20Asignaciones/gestionar-asignacion-unified.html" role="listitem">Asignación</a>'
           ]
           navLinks.innerHTML = links.join('')
         }
@@ -752,7 +753,8 @@
   </script>
 
   <div id="user-modal-overlay" class="modal-overlay"></div>
-  <div id="user-modal" class="modal" style="max-width: 420px; min-width: 320px; width: 90vw; max-height: 80vh; overflow-y: auto;">
+  <div id="user-modal" class="modal"
+    style="max-width: 420px; min-width: 320px; width: 90vw; max-height: 80vh; overflow-y: auto;">
     <div class="modal-header">
       <h2 id="user-modal-title">Detalle de usuario</h2>
       <button id="modal-close" type="button" aria-label="Cerrar" class="icon-link">✕</button>
@@ -790,11 +792,13 @@
       </div>
       <label>
         Contraseña (opcional)
-        <input id="modal-password" type="password" placeholder="Dejar en blanco para no cambiar" autocomplete="new-password" />
+        <input id="modal-password" type="password" placeholder="Dejar en blanco para no cambiar"
+          autocomplete="new-password" />
       </label>
       <label>
         Confirmar Contraseña
-        <input id="modal-confirm-password" type="password" placeholder="Repite la contraseña" autocomplete="new-password" />
+        <input id="modal-confirm-password" type="password" placeholder="Repite la contraseña"
+          autocomplete="new-password" />
       </label>
       <label>
         Teléfono
@@ -831,7 +835,7 @@
     <div class="modal-footer">
       <button id="modal-save" type="button" class="primary-button">Guardar</button>
     </div>
-  <script src="user-table.js"></script>
+    <script src="user-table.js"></script>
   </div>
 </body>
 
