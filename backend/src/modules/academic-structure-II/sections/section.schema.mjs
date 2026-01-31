@@ -1,4 +1,4 @@
-import {z} from 'zod';
+import { z } from 'zod';
 
 // Esquema de validación para la creación de una sección académica
 const schemaSection = z.object({
@@ -11,15 +11,16 @@ const schemaSection = z.object({
 // Esquema de validación para la actualización de una sección académica
 const schemaUpdateSection = z.object({
     section_name: z.string().min(1).max(100).optional(),
-    capacity: z.number().int().positive().optional()
+    capacity: z.number().int().positive().optional(),
+    is_active: z.number().int().min(0).max(1).optional()
 });
 
 // Función para validar los datos de creación de una sección académica
-export function validateSection(data){
+export function validateSection(data) {
     return schemaSection.safeParse(data);
 }
 
 // Función para validar los datos de actualización de una sección académica
-export function validateUpdateSection(data){
+export function validateUpdateSection(data) {
     return schemaUpdateSection.partial().safeParse(data);
 }
