@@ -171,10 +171,10 @@
             <input id="password" type="password" placeholder="Crea tu contraseña" required />
             <button class="ghost-button toggle-pass" type="button" data-target="password"
               aria-label="Mostrar u ocultar contraseña">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                <circle cx="12" cy="12" r="3" />
-              </svg>
+              <span class="eye-icon">
+                <!-- Ícono de ojo visible por defecto -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye-icon lucide-eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+              </span>
             </button>
           </div>
         </div>
@@ -191,10 +191,10 @@
             <input id="confirm-password" type="password" placeholder="Repite tu contraseña" required />
             <button class="ghost-button toggle-pass" type="button" data-target="confirm-password"
               aria-label="Mostrar u ocultar confirmación de contraseña">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                <circle cx="12" cy="12" r="3" />
-              </svg>
+              <span class="eye-icon">
+                <!-- Ícono de ojo visible por defecto -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye-icon lucide-eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+              </span>
             </button>
           </div>
         </div>
@@ -213,19 +213,19 @@
   </main>
 
   <script>
-    // Lógica para los "Ojos" (Toggle Visibility)
-    // Seleccionamos todos los botones que tengan la clase 'toggle-pass'
+    // Lógica para los "Ojos" (Toggle Visibility con cambio de ícono)
     document.querySelectorAll('.toggle-pass').forEach(button => {
       button.addEventListener('click', function () {
-        // Obtenemos el ID del input asociado desde el atributo data-target
         const targetId = this.getAttribute('data-target');
         const input = document.getElementById(targetId);
-
-        // Cambiamos el tipo de input
-        const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
-        input.setAttribute('type', type);
-
-        // (Opcional) Aquí podrías cambiar el ícono SVG si quisieras mostrar un ojo tachado
+        const eyeIcon = this.querySelector('.eye-icon');
+        const eyeSVG = `<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-eye-icon lucide-eye\"><path d=\"M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/></svg>`;
+        const eyeOffSVG = `<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-eye-off-icon lucide-eye-off\"><path d=\"M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49\"/><path d=\"M14.084 14.158a3 3 0 0 1-4.242-4.242\"/><path d=\"M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143\"/><path d=\"m2 2 20 20\"/></svg>`;
+        const isPassword = input.getAttribute('type') === 'password';
+        input.setAttribute('type', isPassword ? 'text' : 'password');
+        if (eyeIcon) {
+          eyeIcon.innerHTML = isPassword ? eyeOffSVG : eyeSVG;
+        }
         this.classList.toggle('active');
       });
     });
