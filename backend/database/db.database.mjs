@@ -12,18 +12,31 @@ export const db = mysql.createPool({
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
-    decimalNumbers: true,
-    // CONFIGURACIÓN DE SSL (Obligatorio para Aiven)
-    ssl: {
-        rejectUnauthorized: false 
-    }
+    decimalNumbers: true
+    // CONFIGURACIÓN DE SSL (Solo para Aiven - Comentado para MySQL local)
+    // ssl: {
+    //     rejectUnauthorized: false 
+    // }
 });
 
-// Prueba de conexión inicial
+// Prueba de conexión inicial y auto-migraciones
 try {
     const connection = await db.getConnection();
-    console.log("✅ Conexión a la base de datos Aiven exitosa");
+    console.log("✅ Conexión a la base de datos MySQL local exitosa");
+
+    // Auto-migración: Verificar si existe la columna is_active en la tabla sections
+    try {
+        const [columns] = await connection.query('SHOW COLUMNS FROM sections LIKE "is_active"');
+        if (columns.length === 0) {
+            console.log("🛠️  Estructura desactualizada: Añadiendo columna 'is_active' a la tabla 'sections'...");
+            await connection.query('ALTER TABLE sections ADD COLUMN is_active TINYINT DEFAULT 1');
+            console.log("✅ Columna 'is_active' añadida exitosamente");
+        }
+    } catch (migError) {
+        console.error("⚠️ Error durante la migración automática:", migError.message);
+    }
+
     connection.release();
 } catch (error) {
-    console.error("❌ Error conectando a Aiven:", error.message);
+    console.error("❌ Error conectando a MySQL local:", error.message);
 }
