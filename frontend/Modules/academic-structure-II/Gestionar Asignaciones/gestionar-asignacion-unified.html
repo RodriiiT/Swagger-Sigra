@@ -164,11 +164,6 @@
                     <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Secciones
                         Disponibles</label>
                     <div id="sectionsDisplay" class="flex flex-wrap gap-2"></div>
-                    <button id="btnMagicSections" type="button"
-                        class="mt-3 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold rounded-xl hover:opacity-90 shadow-lg transition-all text-sm">
-                        <span class="material-symbols-outlined text-sm">auto_fix_high</span>
-                        Crear Secciones A, B, C y D
-                    </button>
                 </div>
             </div>
         </div>
@@ -310,7 +305,6 @@
         const yearInput = document.getElementById('yearInput');
         const sectionsContainer = document.getElementById('sectionsContainer');
         const sectionsDisplay = document.getElementById('sectionsDisplay');
-        const btnMagicSections = document.getElementById('btnMagicSections');
         const btnOpenNewSectionModal = document.getElementById('btnOpenNewSectionModal');
         const quickSectionModal = document.getElementById('quickSectionModal');
         const quickSectionForm = document.getElementById('quickSectionForm');
@@ -356,64 +350,29 @@
                     const data = await res.json();
                     currentSections = data.sections || [];
 
+                    // Obtener el academic_year_id de la primera sección (todas deberían tener el mismo)
                     if (currentSections.length > 0) {
+                        currentAcademicYearId = currentSections[0].academic_year_id;
+                        console.log('Academic Year ID obtenido de secciones:', currentAcademicYearId);
                         renderSectionsChips(currentSections);
                     } else {
+                        // Si no hay secciones, intentar obtener el año activo de forma alternativa
+                        // Por ahora, usaremos un valor por defecto o se lo pediremos al usuario crear
                         sectionsDisplay.innerHTML = '<p class="text-sm text-gray-500">No hay secciones para este grado. Cree una nueva.</p>';
+                        // Establecer un academic_year_id por defecto (1 o el actual)
+                        currentAcademicYearId = 1; // TODO: Mejorar esto cuando exista el endpoint
                     }
                 } catch (error) {
                     sectionsDisplay.innerHTML = '<p class="text-sm text-red-500">Error al cargar secciones.</p>';
                 }
             });
 
-            btnMagicSections.addEventListener('click', async () => {
-                if (!currentGradeId || !currentAcademicYearId) {
-                    alert('Por favor, verifique que haya un período académico activo.');
-                    return;
-                }
-
-                if (!confirm('¿Crear automáticamente las secciones A, B, C y D con capacidad de 30 estudiantes?')) return;
-
-                const sections = ['A', 'B', 'C', 'D'];
-                let created = 0;
-
-                for (const sec of sections) {
-                    try {
-                        const response = await fetch(`${API_BASE}/sections/create`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                grade_id: parseInt(currentGradeId),
-                                academic_year_id: parseInt(currentAcademicYearId),
-                                section_name: sec,
-                                capacity: 30
-                            })
-                        });
-                        const data = await response.json();
-                        if (!data.error) created++;
-                    } catch (error) {
-                        console.error('Error creating section:', error);
-                    }
-                }
-
-                alert(`Se crearon ${created} secciones exitosamente.`);
-                yearInput.dispatchEvent(new Event('input'));
-            });
-
             btnOpenNewSectionModal.addEventListener('click', async () => {
                 if (!currentGradeId) return alert('Por favor, ingrese un grado primero.');
 
-                // Obtener año académico activo
-                try {
-                    const resYear = await fetch(`${API_BASE}/academic-years/active`);
-                    const dataYear = await resYear.json();
-                    currentAcademicYearId = dataYear.activeYear?.year_id;
-
-                    if (!currentAcademicYearId) {
-                        return alert('No hay un período académico activo.');
-                    }
-                } catch (error) {
-                    return alert('Error al obtener el período académico activo.');
+                // Verificar que haya un año académico activo
+                if (!currentAcademicYearId) {
+                    return alert('No hay un período académico activo. Verifique que exista un período en el sistema.');
                 }
 
                 const gradeName = `${currentGradeId}° año`;
@@ -472,10 +431,10 @@
                 const chip = document.createElement('button');
                 chip.type = 'button';
                 chip.className = `px-4 py-2 rounded-lg border-2 transition-all font-bold text-sm ${selectedSectionForAssignment === sec.section_id
-                        ? 'bg-primary text-white border-primary shadow-lg'
-                        : isClosed
-                            ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 border-gray-300 dark:border-gray-600 opacity-50 cursor-not-allowed'
-                            : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-primary hover:text-primary'
+                    ? 'bg-primary text-white border-primary shadow-lg'
+                    : isClosed
+                        ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 border-gray-300 dark:border-gray-600 opacity-50 cursor-not-allowed'
+                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-primary hover:text-primary'
                     }`;
 
                 chip.innerHTML = `
@@ -791,17 +750,6 @@
                 item.style.display = text.includes(query) ? 'flex' : 'none';
             });
         }
-
-        // Get active academic year on load
-        (async () => {
-            try {
-                const res = await fetch(`${API_BASE}/academic-years/active`);
-                const data = await res.json();
-                currentAcademicYearId = data.activeYear?.year_id;
-            } catch (error) {
-                console.error('Error fetching active academic year:', error);
-            }
-        })();
     </script>
     <script src="/Modules/academic-structure-II/js/navbar.js"></script>
 </body>

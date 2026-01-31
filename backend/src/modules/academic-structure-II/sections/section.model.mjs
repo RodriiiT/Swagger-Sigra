@@ -23,7 +23,7 @@ export class SectionModel {
     static async getSectionsByGrade(gradeId) {
         if (!gradeId) return { error: 'El ID del grado es requerido' };
         const [sections] = await db.query(
-            `SELECT s.section_id, s.section_name, s.capacity, s.number_of_students, s.grade_id, g.grade_name, s.is_active
+            `SELECT s.section_id, s.section_name, s.capacity, s.number_of_students, s.grade_id, s.academic_year_id, g.grade_name, s.is_active
             FROM sections s
             JOIN grades g ON s.grade_id = g.grade_id
             JOIN academic_years ay ON s.academic_year_id = ay.year_id
