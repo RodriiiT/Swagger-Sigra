@@ -4,5 +4,11 @@
   "trailingSlash": false,
   "redirects": [
     { "source": "/", "destination": "/Modules/access-control-I/login.html" }
+  ],
+  "rewrites": [
+    {
+      "source": "/favicon.ico",
+      "destination": "/Public/resources/Modulo-1/logo.png"
+    }
   ]
 }
