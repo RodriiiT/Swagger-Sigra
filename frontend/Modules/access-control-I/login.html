@@ -53,11 +53,10 @@
               aria-label="Contraseña" autocomplete="current-password" />
 
             <button class="ghost-button toggle-password-btn" type="button" aria-label="Mostrar u ocultar contraseña">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6Z" stroke="currentColor" stroke-width="1.5"
-                  stroke-linecap="round" stroke-linejoin="round" />
-                <circle cx="12" cy="12" r="2.5" stroke="currentColor" stroke-width="1.5" />
-              </svg>
+              <span id="eye-icon">
+                <!-- Ícono de ojo visible por defecto -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye-icon lucide-eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+              </span>
             </button>
           </div>
           <p class="input-error" id="password-error" aria-live="polite"></p>
@@ -96,10 +95,16 @@
       let isRecoverMode = false
 
       if (toggleBtn) {
+        const eyeIcon = document.getElementById('eye-icon');
+        const eyeSVG = `<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-eye-icon lucide-eye\"><path d=\"M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/></svg>`;
+        const eyeOffSVG = `<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-eye-off-icon lucide-eye-off\"><path d=\"M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49\"/><path d=\"M14.084 14.158a3 3 0 0 1-4.242-4.242\"/><path d=\"M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143\"/><path d=\"m2 2 20 20\"/></svg>`;
         toggleBtn.addEventListener('click', () => {
-          const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password'
-          passwordInput.setAttribute('type', type)
-        })
+          const isPassword = passwordInput.getAttribute('type') === 'password';
+          passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+          if (eyeIcon) {
+            eyeIcon.innerHTML = isPassword ? eyeOffSVG : eyeSVG;
+          }
+        });
       }
 
       function setError(element, message) {
