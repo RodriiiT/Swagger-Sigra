@@ -200,6 +200,12 @@ export class ActivitiesModel {
             [activityId]
         );
         if(existingActivity.length === 0) return {error: 'La actividad no existe'};
+        // Comprobamos si existen entregas asociadas a esta actividad
+        const [existingSubmissions] = await db.query(
+            `SELECT submission_id FROM submissions WHERE activity_id = ? LIMIT 1`,
+            [activityId]
+        );
+        if (existingSubmissions.length > 0) return { error: 'No se puede eliminar la actividad porque tiene entregas asociadas' };
         // Si existe, se procede a eliminarla
         const [deletedActivity] = await db.query(
             `DELETE FROM activities WHERE activity_id = ?`,
