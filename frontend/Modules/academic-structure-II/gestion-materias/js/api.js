@@ -1,4 +1,4 @@
-const BASE_URL = "https://sigra.irissoftware.lat/api";
+const BASE_URL = "http://localhost:3000/api";
 
 console.log('[API] Módulo api.js cargado. BASE_URL:', BASE_URL);
 
@@ -39,15 +39,25 @@ export async function apiObtenerCatalogoMaterias() {
 	const response = await request(`/subjects/all`, { method: "GET" });
 	// Transformar la respuesta del backend al formato esperado por el frontend
 	return {
-		data: (response.subjects || []).map(m => ({
-			id: m.subject_id,
-			nombre: m.subject_name,
-			codigo: m.code_subject,
-			sigla: m.code_subject?.substring(0, 3) || "MAT",
-			anioId: parseInt(m.anio?.replace(/[^0-9]/g, '')) || m.grade_id || null,
-			area: m.area || "todas",
-			tipo: m.is_active === 1 ? "troncal" : "complementaria"
-		}))
+		data: (response.subjects || []).map(m => {
+			// Priorizar grade_id, luego intentar extraer del anio
+			let anioId = m.grade_id;
+			if (!anioId && m.anio) {
+				// Intentar extraer número del anio (ej: "1° año" -> 1)
+				const extracted = parseInt(m.anio.toString().replace(/[^0-9]/g, ''));
+				anioId = extracted || null;
+			}
+
+			return {
+				id: m.subject_id,
+				nombre: m.subject_name,
+				codigo: m.code_subject,
+				sigla: m.code_subject?.substring(0, 3) || "MAT",
+				anioId: anioId,
+				area: m.area || "todas",
+				tipo: m.is_active === 1 ? "troncal" : "complementaria"
+			};
+		})
 	};
 }
 
