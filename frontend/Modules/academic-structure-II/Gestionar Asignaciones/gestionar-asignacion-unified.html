@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Gestión de Asignaciones - SIGRA</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#002F87",
+                        "success": "#10B981",
+                        "error": "#C52B3D",
+                        "background-light": "#F3F4F6",
+                        "background-dark": "#1a1c20",
+                        "card-light": "#FFFFFF",
+                        "card-dark": "#1F2937",
+                        "text-main-light": "#1F2937",
+                        "text-main-dark": "#F9FAFB",
+                        "nav-gray": "#64748B"
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style type="text/tailwindcss">
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #334155;
+        }
+    </style>
+    <link rel="stylesheet" href="/Modules/academic-structure-II/css/navbar.css" />
+</head>
+
+<body
+    class="bg-background-light dark:bg-background-dark font-display text-text-main-light dark:text-text-main-dark antialiased min-h-screen flex flex-col transition-colors duration-200">
+    <header>
+        <nav class="navbar" aria-label="Barra de navegación principal">
+            <a class="brand" aria-label="SIGRA" href="/Modules/landing/index.html">
+                <img class="brand-logo" src="/Public/resources/Modulo-1/logo.png" alt="Logo SIGRA" />
+                <span>SIGRA</span>
+            </a>
+
+            <div class="nav-links" role="list">
+                <a href="/Modules/access-control-I/dashboard-control-estudio.html" role="listitem">Inicio</a>
+                <a href="/Modules/academic-structure-II/catalogo-materias/index.html" role="listitem">Catalogo</a>
+                <a href="/Modules/academic-structure-II/gestion-materias/index.html" role="listitem">Materias</a>
+                <a href="/Modules/academic-structure-II/definicion-prelaciones/index.html"
+                    role="listitem">Prelaciones</a>
+                <a href="/Modules/academic-structure-II/gestion-horarios/index.html" role="listitem">Horarios</a>
+                <a class="active"
+                    href="/Modules/academic-structure-II/Gestionar%20Asignaciones/gestionar-asignacion-unified.html"
+                    role="listitem">Asignación</a>
+            </div>
+
+            <div class="profile-menu" aria-label="Menú de perfil">
+                <button class="profile-button" id="profile-button" type="button" aria-haspopup="true"
+                    aria-expanded="false">
+                    <span class="profile-avatar" id="profile-avatar" aria-hidden="true">--</span>
+                    <span class="sr-only">Abrir menú de perfil</span>
+                </button>
+                <div class="profile-dropdown" id="profile-dropdown" role="menu">
+                    <ul class="profile-list" role="menu">
+                        <li class="profile-info" id="profile-info-name" role="presentation">Usuario</li>
+                        <li role="none"><button type="button" class="profile-item" data-profile-action="create"
+                                role="menuitem">Crear usuario</button></li>
+                        <li role="none"><button type="button" class="profile-item" data-profile-action="edit"
+                                role="menuitem">Editar
+                                usuario</button></li>
+                        <li role="none"><button type="button" class="profile-item" data-profile-action="logout"
+                                role="menuitem">Cerrar sesión</button></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="sm:flex sm:items-center sm:justify-between mb-8">
+            <div>
+                <h1 class="text-3xl font-bold leading-tight text-text-main-light dark:text-text-main-dark">
+                    Gestión de Asignaciones
+                </h1>
+                <p class="mt-2 text-sm text-primary font-medium">
+                    Administre estudiantes, profesores y secciones del período académico activo
+                </p>
+            </div>
+            <div class="mt-4 sm:mt-0 flex items-center gap-4">
+                <div class="flex items-center bg-gray-200 dark:bg-gray-700 rounded-lg p-1">
+                    <button id="toggleStudents"
+                        class="relative bg-white dark:bg-gray-600 shadow-sm rounded-md py-1.5 px-4 text-sm font-semibold text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-800 focus:ring-primary"
+                        type="button">
+                        Estudiantes
+                    </button>
+                    <button id="toggleTeachers"
+                        class="ml-0.5 relative border border-transparent rounded-md py-1.5 px-4 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:z-10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-800 focus:ring-primary"
+                        type="button">
+                        Profesores
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección de Gestión de Secciones -->
+        <div
+            class="bg-card-light dark:bg-card-dark rounded-2xl shadow-sm p-6 mb-6 border border-gray-100 dark:border-gray-700">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">school</span>
+                    <h2 class="text-lg font-bold">Gestión de Secciones</h2>
+                </div>
+                <button id="btnOpenNewSectionModal" type="button"
+                    class="flex items-center gap-2 px-4 py-2 bg-primary text-white font-bold rounded-xl hover:bg-opacity-90 shadow-lg shadow-primary/20 transition-all active:scale-95">
+                    <span class="material-symbols-outlined text-sm">add_box</span>
+                    Nueva Sección
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="md:col-span-1">
+                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Año / Grado</label>
+                    <input id="yearInput"
+                        class="w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg shadow-sm focus:border-primary focus:ring-primary py-2.5 px-4"
+                        placeholder="Ingrese el grado (1, 2, 3...)" type="number" min="1" max="12" />
+                </div>
+
+                <div id="sectionsContainer" class="md:col-span-2 hidden">
+                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Secciones
+                        Disponibles</label>
+                    <div id="sectionsDisplay" class="flex flex-wrap gap-2"></div>
+                    <button id="btnMagicSections" type="button"
+                        class="mt-3 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold rounded-xl hover:opacity-90 shadow-lg transition-all text-sm">
+                        <span class="material-symbols-outlined text-sm">auto_fix_high</span>
+                        Crear Secciones A, B, C y D
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Paneles de Asignación -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-450px)] min-h-[600px]">
+            <div id="panel-left"
+                class="bg-card-light dark:bg-card-dark shadow-sm rounded-xl flex flex-col overflow-hidden border border-gray-100 dark:border-gray-700">
+                <div
+                    class="p-6 border-b border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <h2 class="text-lg font-bold text-text-main-light dark:text-text-main-dark flex items-center">
+                        <span class="material-symbols-outlined mr-2 text-gray-400">person_add</span>
+                        Personas No Asignadas
+                    </h2>
+                    <div class="relative rounded-md shadow-sm w-full sm:w-auto flex-grow max-w-xs">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <span class="material-symbols-outlined text-gray-400 text-sm">search</span>
+                        </div>
+                        <input
+                            class="focus:ring-primary focus:border-primary block w-full pl-10 sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md h-10"
+                            id="search" name="search" placeholder="Buscar..." type="text" />
+                    </div>
+                </div>
+                <div id="unassignedList" class="flex-1 overflow-y-auto p-4 space-y-3 hide-scrollbar">
+                    <p class="text-center text-gray-400 py-10">Seleccione un grado y sección para ver personas
+                        disponibles.</p>
+                </div>
+                <div id="unassignedFooter"
+                    class="p-4 bg-gray-50 dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 text-center text-xs text-gray-500 dark:text-gray-400 font-medium">
+                    --
+                </div>
+            </div>
+            <div id="panel-right"
+                class="bg-card-light dark:bg-card-dark shadow-sm rounded-xl flex flex-col overflow-hidden border border-gray-100 dark:border-gray-700 relative">
+                <div class="p-6 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+                    <h2 class="text-lg font-bold text-primary flex items-center">
+                        <span class="material-symbols-outlined mr-2">how_to_reg</span>
+                        Asignados a la Sección
+                    </h2>
+                    <span id="assignedCount"
+                        class="inline-flex items-center px-3 py-1 rounded-md text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">
+                        0 seleccionados
+                    </span>
+                </div>
+                <div id="assignedList" class="flex-1 overflow-y-auto p-4 space-y-4 hide-scrollbar">
+                    <p class="text-center text-gray-400 py-10">Ningún elemento asignado aún.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal para seleccionar materia -->
+    <div id="subjectModal"
+        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+        <div
+            class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
+            <div
+                class="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-900/50">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white flex items-center">
+                    <span class="material-symbols-outlined mr-2 text-primary">book</span>
+                    Asignar Materia
+                </h3>
+                <button onclick="closeSubjectModal()"
+                    class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="p-6">
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Seleccione la materia que impartirá el profesor
+                    en esta sección:</p>
+                <div id="subjectList" class="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                    <p class="text-center text-gray-400 py-4">Cargando materias...</p>
+                </div>
+            </div>
+            <div class="p-4 bg-gray-50 dark:bg-gray-900/50 flex justify-end">
+                <button onclick="closeSubjectModal()"
+                    class="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Nueva Sección -->
+    <div id="quickSectionModal"
+        class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-[100] backdrop-blur-sm">
+        <div
+            class="bg-white dark:bg-gray-800 rounded-3xl p-8 w-full max-w-sm shadow-2xl transform transition-all scale-95 border border-gray-100 dark:border-gray-700">
+            <h3 id="quickSectionModalTitle"
+                class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">add_circle</span>
+                Crear Nueva Sección
+            </h3>
+            <form id="quickSectionForm" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Nombre de
+                        Sección</label>
+                    <input id="quickSecName" type="text" maxlength="1" required
+                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-center text-2xl font-bold uppercase"
+                        placeholder="A" />
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Capacidad
+                        (Cupos)</label>
+                    <input id="quickSecCap" type="number" min="1" value="30" required
+                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent" />
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="document.getElementById('quickSectionModal').classList.add('hidden')"
+                        class="flex-1 px-4 py-3 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-xl font-bold hover:bg-gray-300 dark:hover:bg-gray-600 transition-all">
+                        Cancelar
+                    </button>
+                    <button type="submit"
+                        class="flex-1 px-4 py-3 bg-primary text-white rounded-xl font-bold hover:bg-opacity-90 shadow-lg shadow-primary/30 transition-all active:scale-95">
+                        Crear
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000/api';
+        let currentSectionId = null;
+        let currentAcademicYearId = null;
+        let currentGradeId = null;
+        let currentTeacherToAssign = null;
+        let viewMode = 'students';
+        let currentSections = [];
+        let selectedSectionForAssignment = null;
+
+        const unassignedList = document.getElementById('unassignedList');
+        const assignedList = document.getElementById('assignedList');
+        const unassignedFooter = document.getElementById('unassignedFooter');
+        const assignedCount = document.getElementById('assignedCount');
+        const toggleStudents = document.getElementById('toggleStudents');
+        const toggleTeachers = document.getElementById('toggleTeachers');
+        const searchInput = document.getElementById('search');
+        const yearInput = document.getElementById('yearInput');
+        const sectionsContainer = document.getElementById('sectionsContainer');
+        const sectionsDisplay = document.getElementById('sectionsDisplay');
+        const btnMagicSections = document.getElementById('btnMagicSections');
+        const btnOpenNewSectionModal = document.getElementById('btnOpenNewSectionModal');
+        const quickSectionModal = document.getElementById('quickSectionModal');
+        const quickSectionForm = document.getElementById('quickSectionForm');
+
+        // Initial Load
+        document.addEventListener('DOMContentLoaded', () => {
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            toggleStudents.addEventListener('click', () => {
+                viewMode = 'students';
+                updateToggleStyles();
+                if (selectedSectionForAssignment) loadData();
+            });
+
+            toggleTeachers.addEventListener('click', () => {
+                viewMode = 'teachers';
+                updateToggleStyles();
+                if (selectedSectionForAssignment) loadData();
+            });
+
+            searchInput.addEventListener('input', (e) => {
+                filterLists(e.target.value.toLowerCase());
+            });
+
+            yearInput.addEventListener('input', async function () {
+                const grade = this.value;
+                currentGradeId = grade;
+
+                if (!grade || grade < 1) {
+                    sectionsContainer.classList.add('hidden');
+                    selectedSectionForAssignment = null;
+                    resetLists();
+                    return;
+                }
+
+                sectionsContainer.classList.remove('hidden');
+                sectionsDisplay.innerHTML = '<p class="text-sm text-gray-500">Cargando secciones...</p>';
+
+                try {
+                    const res = await fetch(`${API_BASE}/sections/grade/${grade}`);
+                    const data = await res.json();
+                    currentSections = data.sections || [];
+
+                    if (currentSections.length > 0) {
+                        renderSectionsChips(currentSections);
+                    } else {
+                        sectionsDisplay.innerHTML = '<p class="text-sm text-gray-500">No hay secciones para este grado. Cree una nueva.</p>';
+                    }
+                } catch (error) {
+                    sectionsDisplay.innerHTML = '<p class="text-sm text-red-500">Error al cargar secciones.</p>';
+                }
+            });
+
+            btnMagicSections.addEventListener('click', async () => {
+                if (!currentGradeId || !currentAcademicYearId) {
+                    alert('Por favor, verifique que haya un período académico activo.');
+                    return;
+                }
+
+                if (!confirm('¿Crear automáticamente las secciones A, B, C y D con capacidad de 30 estudiantes?')) return;
+
+                const sections = ['A', 'B', 'C', 'D'];
+                let created = 0;
+
+                for (const sec of sections) {
+                    try {
+                        const response = await fetch(`${API_BASE}/sections/create`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                grade_id: parseInt(currentGradeId),
+                                academic_year_id: parseInt(currentAcademicYearId),
+                                section_name: sec,
+                                capacity: 30
+                            })
+                        });
+                        const data = await response.json();
+                        if (!data.error) created++;
+                    } catch (error) {
+                        console.error('Error creating section:', error);
+                    }
+                }
+
+                alert(`Se crearon ${created} secciones exitosamente.`);
+                yearInput.dispatchEvent(new Event('input'));
+            });
+
+            btnOpenNewSectionModal.addEventListener('click', async () => {
+                if (!currentGradeId) return alert('Por favor, ingrese un grado primero.');
+
+                // Obtener año académico activo
+                try {
+                    const resYear = await fetch(`${API_BASE}/academic-years/active`);
+                    const dataYear = await resYear.json();
+                    currentAcademicYearId = dataYear.activeYear?.year_id;
+
+                    if (!currentAcademicYearId) {
+                        return alert('No hay un período académico activo.');
+                    }
+                } catch (error) {
+                    return alert('Error al obtener el período académico activo.');
+                }
+
+                const gradeName = `${currentGradeId}° año`;
+                document.getElementById('quickSectionModalTitle').innerHTML = `<span class="material-symbols-outlined text-primary">add_circle</span> Crear ${gradeName}`;
+
+                const letters = currentSections.map(s => s.section_name.toUpperCase()).sort();
+                let nextLetter = 'A';
+                if (letters.length > 0) {
+                    const lastLetter = letters[letters.length - 1];
+                    const charCode = lastLetter.charCodeAt(0);
+                    nextLetter = String.fromCharCode(charCode + 1);
+                }
+
+                document.getElementById('quickSecName').value = nextLetter;
+                quickSectionModal.classList.remove('hidden');
+                document.getElementById('quickSecName').focus();
+            });
+
+            quickSectionForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const name = document.getElementById('quickSecName').value.toUpperCase();
+                const capacity = document.getElementById('quickSecCap').value;
+
+                try {
+                    const response = await fetch(`${API_BASE}/sections/create`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            grade_id: parseInt(currentGradeId),
+                            academic_year_id: parseInt(currentAcademicYearId),
+                            section_name: name,
+                            capacity: parseInt(capacity)
+                        })
+                    });
+                    const data = await response.json();
+
+                    if (data.error) {
+                        alert('Error: ' + data.error);
+                    } else {
+                        alert('¡Sección creada exitosamente!');
+                        quickSectionModal.classList.add('hidden');
+                        quickSectionForm.reset();
+                        yearInput.dispatchEvent(new Event('input'));
+                    }
+                } catch (error) {
+                    alert('Error al conectar con el servidor.');
+                }
+            });
+        }
+
+        function renderSectionsChips(sections) {
+            sectionsDisplay.innerHTML = '';
+
+            sections.forEach(sec => {
+                const isClosed = sec.is_active === 0;
+                const chip = document.createElement('button');
+                chip.type = 'button';
+                chip.className = `px-4 py-2 rounded-lg border-2 transition-all font-bold text-sm ${selectedSectionForAssignment === sec.section_id
+                        ? 'bg-primary text-white border-primary shadow-lg'
+                        : isClosed
+                            ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 border-gray-300 dark:border-gray-600 opacity-50 cursor-not-allowed'
+                            : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-primary hover:text-primary'
+                    }`;
+
+                chip.innerHTML = `
+                    Sección ${sec.section_name}
+                    ${isClosed ? '<span class="ml-1">🔒</span>' : ''}
+                    <span class="ml-2 text-xs opacity-75">(${sec.number_of_students || 0}/${sec.capacity})</span>
+                `;
+
+                if (!isClosed) {
+                    chip.onclick = async () => {
+                        selectedSectionForAssignment = sec.section_id;
+                        currentSectionId = sec.section_id;
+                        currentAcademicYearId = sec.academic_year_id;
+                        renderSectionsChips(sections);
+                        await loadData();
+                    };
+                }
+
+                sectionsDisplay.appendChild(chip);
+            });
+
+            // Botón de gestión de estados
+            const manageBtn = document.createElement('button');
+            manageBtn.type = 'button';
+            manageBtn.className = 'px-4 py-2 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 text-gray-500 hover:border-primary hover:text-primary transition-all font-bold text-sm';
+            manageBtn.innerHTML = '<span class="material-symbols-outlined text-sm">settings</span>';
+            manageBtn.onclick = () => showSectionManagement();
+            sectionsDisplay.appendChild(manageBtn);
+        }
+
+        async function showSectionManagement() {
+            if (!currentSections.length) return;
+
+            const html = currentSections.map(sec => {
+                const isClosed = sec.is_active === 0;
+                return `
+                    <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <div>
+                            <span class="font-bold">Sección ${sec.section_name}</span>
+                            <span class="text-xs text-gray-500 ml-2">${sec.number_of_students || 0}/${sec.capacity} estudiantes</span>
+                        </div>
+                        <button onclick="toggleSectionStatus(${sec.section_id}, ${sec.is_active})" 
+                            class="p-2 rounded-lg transition-all ${isClosed ? 'text-green-600 hover:bg-green-50' : 'text-red-600 hover:bg-red-50'}">
+                            <span class="material-symbols-outlined">${isClosed ? 'lock_open' : 'lock'}</span>
+                        </button>
+                    </div>
+                `;
+            }).join('');
+
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black/60 flex items-center justify-center z-[100] backdrop-blur-sm';
+            modal.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md">
+                    <h3 class="text-xl font-bold mb-4">Administrar Secciones</h3>
+                    <div class="space-y-2 max-h-96 overflow-y-auto">${html}</div>
+                    <button onclick="this.closest('.fixed').remove()" 
+                        class="mt-4 w-full px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg font-bold hover:bg-gray-300">
+                        Cerrar
+                    </button>
+                </div>
+            `;
+            modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+            document.body.appendChild(modal);
+        }
+
+        window.toggleSectionStatus = async (sectionId, currentStatus) => {
+            const newStatus = currentStatus === 1 ? 0 : 1;
+            const action = newStatus ? 'abrir' : 'cerrar';
+
+            if (!confirm(`¿Está seguro que desea ${action} esta sección?`)) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/sections/update/${sectionId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ is_active: newStatus })
+                });
+
+                const data = await response.json();
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                } else {
+                    document.querySelector('.fixed.inset-0')?.remove();
+                    yearInput.dispatchEvent(new Event('input'));
+                }
+            } catch (error) {
+                alert('Error al conectar con el servidor.');
+            }
+        };
+
+        function updateToggleStyles() {
+            if (viewMode === 'students') {
+                toggleStudents.classList.add('bg-white', 'dark:bg-gray-600', 'shadow-sm', 'font-semibold');
+                toggleStudents.classList.remove('border-transparent', 'font-medium');
+                toggleTeachers.classList.remove('bg-white', 'dark:bg-gray-600', 'shadow-sm', 'font-semibold');
+                toggleTeachers.classList.add('border-transparent', 'font-medium');
+            } else {
+                toggleTeachers.classList.add('bg-white', 'dark:bg-gray-600', 'shadow-sm', 'font-semibold');
+                toggleTeachers.classList.remove('border-transparent', 'font-medium');
+                toggleStudents.classList.remove('bg-white', 'dark:bg-gray-600', 'shadow-sm', 'font-semibold');
+                toggleStudents.classList.add('border-transparent', 'font-medium');
+            }
+        }
+
+        function resetLists() {
+            unassignedList.innerHTML = '<p class="text-center text-gray-400 py-10">Seleccione una sección para ver los disponibles.</p>';
+            assignedList.innerHTML = '<p class="text-center text-gray-400 py-10">Ningún elemento asignado aún.</p>';
+            unassignedFooter.textContent = '--';
+            assignedCount.textContent = '0 seleccionados';
+        }
+
+        async function loadData() {
+            if (!currentSectionId) return;
+
+            unassignedList.innerHTML = '<p class="text-center text-gray-400 py-10">Cargando...</p>';
+            assignedList.innerHTML = '<p class="text-center text-gray-400 py-10">Cargando...</p>';
+
+            if (viewMode === 'students') {
+                await loadStudents();
+            } else {
+                await loadTeachers();
+            }
+        }
+
+        async function loadStudents() {
+            try {
+                const resUn = await fetch(`${API_BASE}/academic-assignments/unassigned-students/${currentAcademicYearId}`);
+                const dataUn = await resUn.json();
+
+                const resAs = await fetch(`${API_BASE}/academic-assignments/assigned-students/${currentSectionId}`);
+                const dataAs = await resAs.json();
+
+                renderList(unassignedList, dataUn.students || [], true, 'student');
+                renderList(assignedList, dataAs.students || [], false, 'student');
+
+                unassignedFooter.textContent = `Mostrando ${dataUn.students?.length || 0} estudiantes disponibles`;
+                assignedCount.textContent = `${dataAs.students?.length || 0} Estudiantes`;
+            } catch (error) {
+                console.error('Error loading students:', error);
+            }
+        }
+
+        async function loadTeachers() {
+            try {
+                const resUn = await fetch(`${API_BASE}/academic-assignments/unassigned-teachers/${currentSectionId}`);
+                const dataUn = await resUn.json();
+
+                const resAs = await fetch(`${API_BASE}/academic-assignments/assigned-teachers/${currentSectionId}`);
+                const dataAs = await resAs.json();
+
+                renderList(unassignedList, dataUn.teachers || [], true, 'teacher');
+                renderList(assignedList, dataAs.teachers || [], false, 'teacher');
+
+                unassignedFooter.textContent = `Mostrando ${dataUn.teachers?.length || 0} profesores disponibles`;
+                assignedCount.textContent = `${dataAs.teachers?.length || 0} Profesores`;
+            } catch (error) {
+                console.error('Error loading teachers:', error);
+            }
+        }
+
+        function renderList(container, items, isUnassigned, type) {
+            container.innerHTML = '';
+            if (items.length === 0) {
+                container.innerHTML = `<p class="text-center text-gray-400 py-10">${isUnassigned ? 'No hay elementos pendientes' : 'Sin asignaciones'}</p>`;
+                return;
+            }
+
+            items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'group flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-colors duration-150 border border-transparent hover:border-gray-200 dark:hover:border-gray-600';
+
+                const initials = item.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                const colorClass = isUnassigned ? 'bg-gray-100 text-gray-700' : 'bg-primary/10 text-primary';
+
+                const subtitle = type === 'teacher' && item.subject_name
+                    ? `<span class="inline-flex items-center text-primary font-semibold bg-primary/5 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider mb-1">${item.subject_name}</span>`
+                    : `<p class="text-xs text-gray-500 dark:text-gray-400 font-mono">${item.email}</p>`;
+
+                div.innerHTML = `
+    <div class="flex items-center space-x-4">
+        <div class="h-10 w-10 rounded-full ${colorClass} flex items-center justify-center font-bold text-sm">
+            ${initials}
+        </div>
+        <div>
+            ${type === 'teacher' && item.subject_name ? subtitle : ''}
+            <p class="text-sm font-bold text-gray-900 dark:text-white">${item.name}</p>
+            ${type === 'teacher' && item.subject_name ? `<p class="text-[10px] text-gray-400 font-mono">${item.email}</p>` : subtitle}
+        </div>
+    </div>
+    <button
+        onclick="${isUnassigned ? 'assign' : 'unassign'}('${type}', ${item.user_id}, ${item.enrollment_id || item.assignment_id || 'null'})"
+        class="h-8 w-8 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center text-gray-500 dark:text-gray-300 transition-colors">
+        <span class="material-symbols-outlined text-lg">${isUnassigned ? 'add' : 'close'}</span>
+    </button>
+    `;
+                container.appendChild(div);
+            });
+        }
+
+        async function assign(type, userId) {
+            try {
+                if (type === 'student') {
+                    const url = `${API_BASE}/enrollments/create`;
+                    const body = { student_user_id: userId, section_id: parseInt(currentSectionId) };
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body)
+                    });
+                    const data = await response.json();
+                    if (data.error) alert(data.error);
+                    else {
+                        await loadData();
+                        yearInput.dispatchEvent(new Event('input')); // Refresh section counts
+                    }
+                } else {
+                    currentTeacherToAssign = userId;
+                    openSubjectModal();
+                }
+            } catch (error) {
+                console.error('Error assigning:', error);
+            }
+        }
+
+        async function openSubjectModal() {
+            const modal = document.getElementById('subjectModal');
+            const list = document.getElementById('subjectList');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            list.innerHTML = '<p class="text-center text-gray-400 py-4">Cargando materias...</p>';
+
+            await fetch(`${API_BASE}/subjects/grade/${currentGradeId}`)
+                .then(res => res.json())
+                .then(data => {
+                    list.innerHTML = '';
+                    if (!data.subjects || data.subjects.length === 0) {
+                        list.innerHTML = '<p class="text-center text-gray-400 py-4">No hay materias registradas para este grado.</p>';
+                        return;
+                    }
+                    data.subjects.forEach(sub => {
+                        const btn = document.createElement('button');
+                        btn.className = 'w-full flex items-center justify-between p-4 rounded-xl border border-gray-100 dark:border-gray-700 hover:border-primary hover:bg-primary/5 dark:hover:bg-primary/10 transition-all text-left group';
+                        btn.onclick = () => confirmAssignTeacher(sub.subject_id);
+                        btn.innerHTML = `
+                            <div>
+                                <p class="text-sm font-bold text-gray-900 dark:text-white group-hover:text-primary transition-colors">${sub.subject_name}</p>
+                                <p class="text-xs text-gray-500 font-mono uppercase">${sub.code_subject}</p>
+                            </div>
+                            <span class="material-symbols-outlined text-gray-300 group-hover:text-primary transition-colors">add_circle</span>
+                        `;
+                        list.appendChild(btn);
+                    });
+                });
+        }
+
+        async function confirmAssignTeacher(subjectId) {
+            try {
+                const response = await fetch(`${API_BASE}/academic-assignments/assign-teacher`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        teacher_user_id: currentTeacherToAssign,
+                        section_id: parseInt(currentSectionId),
+                        subject_id: parseInt(subjectId)
+                    })
+                });
+                const data = await response.json();
+                if (data.error) alert(data.error);
+                else {
+                    closeSubjectModal();
+                    loadData();
+                }
+            } catch (error) {
+                console.error('Error in teacher assignment:', error);
+            }
+        }
+
+        function closeSubjectModal() {
+            const modal = document.getElementById('subjectModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            currentTeacherToAssign = null;
+        }
+
+        async function unassign(type, userId, id) {
+            if (!confirm("¿Seguro que desea eliminar esta asignación?")) return;
+            try {
+                let url;
+                if (type === 'student') {
+                    url = `${API_BASE}/enrollments/delete/${id}`;
+                } else {
+                    url = `${API_BASE}/academic-assignments/unassign-teacher/${id}`;
+                }
+
+                const response = await fetch(url, { method: 'DELETE' });
+                const data = await response.json();
+                if (data.error) alert(data.error);
+                else {
+                    await loadData();
+                    yearInput.dispatchEvent(new Event('input')); // Refresh section counts
+                }
+            } catch (error) {
+                console.error('Error unassigning:', error);
+            }
+        }
+
+        function filterLists(query) {
+            const allItems = [...unassignedList.children, ...assignedList.children];
+            allItems.forEach(item => {
+                if (item.tagName === 'P') return;
+                const text = item.innerText.toLowerCase();
+                item.style.display = text.includes(query) ? 'flex' : 'none';
+            });
+        }
+
+        // Get active academic year on load
+        (async () => {
+            try {
+                const res = await fetch(`${API_BASE}/academic-years/active`);
+                const data = await res.json();
+                currentAcademicYearId = data.activeYear?.year_id;
+            } catch (error) {
+                console.error('Error fetching active academic year:', error);
+            }
+        })();
+    </script>
+    <script src="/Modules/academic-structure-II/js/navbar.js"></script>
+</body>
+
+</html>
