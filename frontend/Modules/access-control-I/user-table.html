@@ -33,7 +33,8 @@
 
             <li role="none"><button type="button" class="profile-item" data-profile-action="view" role="menuitem">Ver
                 usuario</button></li>
-            <!-- Edit option removed: editing users from UI is disabled -->
+            <li role="none"><button type="button" class="profile-item" data-profile-action="edit" role="menuitem">Editar
+              usuario</button></li>
             <li role="none"><button type="button" class="profile-item" data-profile-action="logout"
                 role="menuitem">Cerrar sesión</button></li>
           </ul>
@@ -140,6 +141,22 @@
         const loggedId = loggedUser.id || loggedUser.user_id
         const loggedRoleId = getLoggedRoleId()
 
+        function hasEditPermission(targetUser){
+          // Rules:
+          // - Admin (1) can edit Control de Estudios (4) and themselves, but not other admins, nor professors(2) or students(3)
+          // - Control de Estudios (4) keeps previous restrictions (cannot edit teachers by design)
+          const targetRole = Number(targetUser.role_id)
+          const targetId = Number(targetUser.user_id)
+          if (Number(loggedRoleId) === 1) {
+            if (targetId === Number(loggedId)) return true // can edit self
+            if (targetRole === 4) return true // can edit Control de Estudios
+            return false // cannot edit admins, teachers or students
+          }
+
+          // Default behavior for non-admins: no edit permission from the table (preserve conservative default)
+          return false
+        }
+
         return (user) => {
           const roleId = Number(user.role_id)
           const isAdminRow = roleId === 1
@@ -158,7 +175,15 @@
                   </svg>
                 </button>`
 
-          // Editing via table removed — only view + toggle allowed
+          // Editing via table: render edit button conditionally based on permissions
+          const canEdit = hasEditPermission(user)
+          const editBtn = canEdit ? `
+                <button class="icon-link" type="button" data-action="edit" data-user="${encodedUser}" aria-label="Editar usuario">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M4 20h4l9.5-9.5a1.5 1.5 0 0 0 0-2.12l-1.88-1.88a1.5 1.5 0 0 0-2.12 0L4 16v4Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" />
+                    <path d="M13.5 6.5 17.5 10.5" stroke="currentColor" stroke-width="1.6" />
+                  </svg>
+                </button>` : ''
           const toggleBtn = `
                 <button class="icon-link ${isActiveRow ? 'danger' : ''}" type="button" data-action="toggle" data-user="${encodedUser}" aria-label="${isActiveRow ? 'Desactivar usuario' : 'Activar usuario'}">
                   <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -168,7 +193,8 @@
                 </button>`
 
           if (isAdminRow) {
-            return viewBtn
+            // Admin rows: allow edit only if it's the logged admin (self) — handled by canEdit
+            return `${viewBtn} ${editBtn}`.trim()
           }
 
           // Control de Estudios: profesores solo se pueden ver (sin editar ni activar/desactivar)
@@ -176,8 +202,8 @@
             return viewBtn
           }
 
-          // Default: view + toggle
-          return `${viewBtn} ${toggleBtn}`
+          // Default: view + optional edit + toggle
+          return `${viewBtn} ${editBtn} ${toggleBtn}`.trim()
         }
       }
 
@@ -396,8 +422,25 @@
       console.log(allUsers)
 
       function openModal(user, mode = 'view') {
-        // Editing is disabled: always open modal in view-only mode
-        mode = 'view'
+        const loggedRoleId = getLoggedRoleId()
+        const stored = getStoredUser() || {}
+        const loggedId = stored.id || stored.user_id
+
+        function canEditTarget(targetUser) {
+          const targetRole = Number(targetUser.role_id)
+          const targetId = Number(targetUser.user_id)
+          // Admin (1) can edit Control de Estudios (4) and themselves, but not other admins, nor professors(2) or students(3)
+          if (Number(loggedRoleId) === 1) {
+            if (targetId === Number(loggedId)) return true
+            if (targetRole === 4) return true
+            return false
+          }
+          return false
+        }
+
+        const requestedEdit = mode === 'edit'
+        const permittedToEdit = requestedEdit && canEditTarget(user)
+
         const modal = document.getElementById('user-modal')
         const overlay = document.getElementById('user-modal-overlay')
         const title = document.getElementById('user-modal-title')
@@ -405,7 +448,7 @@
 
         currentUser = user
 
-        title.textContent = 'Ver usuario'
+        title.textContent = permittedToEdit ? 'Editar usuario' : 'Ver usuario'
 
         fields.forEach((field) => {
           const input = document.getElementById(`modal-${field}`)
@@ -413,16 +456,16 @@
           const value = user[field]
           if (input.type === 'checkbox') {
             input.checked = Boolean(value ?? true)
-            input.disabled = mode === 'view'
+            input.disabled = !permittedToEdit
           } else if (input.tagName === 'SELECT') {
             ensureRoleOption(input, value)
             input.value = value ?? ''
             const isAdmin = Number(value) === 1
-            const lockRoleChange = mode === 'edit' // No permitir cambiar entre profesor/estudiante al editar
-            input.disabled = mode === 'view' || isAdmin || lockRoleChange
+            const lockRoleChange = permittedToEdit // lock role change when editing
+            input.disabled = !permittedToEdit || isAdmin || lockRoleChange
           } else {
             input.value = value ?? ''
-            input.disabled = mode === 'view'
+            input.disabled = !permittedToEdit
           }
         })
 
@@ -443,7 +486,7 @@
             repNationalTop.value = user.parents_national_id ?? ''
             repFirstTop.value = user.parents_first_name ?? ''
             repLastTop.value = user.parents_last_name ?? ''
-            const disabled = (mode === 'view')
+            const disabled = !permittedToEdit
             repNationalTop.disabled = disabled
             repFirstTop.disabled = disabled
             repLastTop.disabled = disabled
@@ -455,21 +498,29 @@
           }
         }
 
-        // La contraseña no se prellena por seguridad; habilitada solo en edición
+        // La contraseña no se prellena por seguridad; habilitada solo si se permite editar
         const pwdInput = document.getElementById('modal-password')
         if (pwdInput) {
           pwdInput.value = ''
-          pwdInput.disabled = mode === 'view'
+          pwdInput.disabled = !permittedToEdit
         }
 
-        // Confirmar contraseña también debe estar deshabilitado en modo 'ver'
+        // Confirmar contraseña también debe estar deshabilitado si no se permite editar
         const confirmPwdInput = document.getElementById('modal-confirm-password')
         if (confirmPwdInput) {
           confirmPwdInput.value = ''
-          confirmPwdInput.disabled = mode === 'view'
+          confirmPwdInput.disabled = !permittedToEdit
         }
 
-        modal.dataset.mode = 'view'
+        modal.dataset.mode = permittedToEdit ? 'edit' : 'view'
+
+        // Show or hide the save button based on permission
+        const modalSaveBtn = document.getElementById('modal-save')
+        if (modalSaveBtn) {
+          modalSaveBtn.style.display = permittedToEdit ? 'inline-block' : 'none'
+          modalSaveBtn.disabled = !permittedToEdit
+        }
+
         modal.classList.add('open')
         overlay.classList.add('open')
       }
@@ -602,6 +653,9 @@
       }
       document.getElementById('modal-close').addEventListener('click', closeModal)
       document.getElementById('user-modal-overlay').addEventListener('click', closeModal)
+      // Restore save handler (button may be re-enabled only when modal in edit mode)
+      const modalSaveBtn = document.getElementById('modal-save')
+      if (modalSaveBtn) modalSaveBtn.addEventListener('click', saveUser)
 
       const addUserBtn = document.getElementById('add-user-btn')
       const profileCreateItem = document.querySelector('[data-profile-action="create"]')
@@ -784,8 +838,9 @@
         <input id="modal-is_active" type="checkbox" />
       </label>
     </div>
-    <!-- Edit disabled: save button removed -->
-    <div class="modal-footer" aria-hidden="true"></div>
+    <div class="modal-footer">
+      <button id="modal-save" type="button" class="primary-button">Guardar</button>
+    </div>
     <script src="user-table.js"></script>
   </div>
 </body>
