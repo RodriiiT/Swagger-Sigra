@@ -3,7 +3,7 @@
 // ==========================================
 
 const viewContainer = document.getElementById('view-container');
-const API_BASE = 'https://sigra.irissoftware.lat/api/subjects'; // Puerto correcto del backend
+const API_BASE = 'http://localhost:3000/api/subjects'; // Backend local
 
 let materias = []; // Array global para las materias
 let currentPage = 1;
@@ -186,7 +186,6 @@ function renderRows(data) {
             <td><span class="badge ${m.is_active == 1 ? 'active' : 'inactive'}">${m.is_active == 1 ? 'Activo' : 'Inactivo'}</span></td>
             <td>
                 <button onclick="showView('editar', '${m.id}')" class="btn-icon edit"><i class='bx bx-edit-alt'></i></button>
-                <button onclick="openDelete('${m.id}')" class="btn-icon delete"><i class='bx bx-trash'></i></button>
             </td>
         </tr>
     `).join('');
@@ -225,33 +224,36 @@ function resetSearch() {
 // ------------------------------------------
 function renderForm(m) {
     const isEdit = !!m;
+    const editNote = isEdit ? '<p style="background:#FEF3C7; padding:12px; border-radius:8px; color:#92400E; margin-bottom:20px;"><strong>Nota:</strong> Solo puedes editar el código y la descripción. El nombre, año y estado no se pueden modificar.</p>' : '';
+
     viewContainer.innerHTML = `
         <div style="margin-bottom:20px; font-size:13px; color:var(--text-muted);">
             Inicio / Gestión de Materias / <span style="color:var(--primary); font-weight:700;">${isEdit ? 'Editar' : 'Crear Nueva'}</span>
         </div>
         <h1 style="margin-bottom:30px;">${isEdit ? 'Editar Asignatura' : 'Crear Nueva Asignatura'}</h1>
+        ${editNote}
         
         <div class="table-card" style="padding:40px; position:relative;">
             <div style="position:absolute; top:0; left:0; width:100%; height:4px; background:var(--primary);"></div>
             <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:25px;">
                 <div class="filter-group" style="grid-column: span 3;">
-                    <label>Nombre de la Materia *</label>
-                    <div class="input-search-wrapper"><i class='bx bx-book'></i><input id="f-nombre" type="text" value="${isEdit ? m.nombre : ''}"></div>
+                    <label>Nombre de la Materia *${isEdit ? ' (No editable)' : ''}</label>
+                    <div class="input-search-wrapper"><i class='bx bx-book'></i><input id="f-nombre" type="text" value="${isEdit ? m.nombre : ''}" ${isEdit ? 'readonly style="background:#F3F4F6; cursor:not-allowed;"' : ''}></div>
                 </div>
                 <div class="filter-group">
-                    <label>Código Identificador *</label>
-                    <div class="input-search-wrapper"><i class='bx bx-hash'></i><input id="f-codigo" type="text" value="${isEdit ? m.codigo : ''}"></div>
+                    <label>Código Identificador *${isEdit ? ' (Editable)' : ''}</label>
+                    <div class="input-search-wrapper" style="${isEdit ? 'border: 2px solid #3B82F6;' : ''}"><i class='bx bx-hash'></i><input id="f-codigo" type="text" value="${isEdit ? m.codigo : ''}"></div>
                 </div>
                 <div class="filter-group">
-                    <label>Estado del Curso</label>
-                    <select id="f-estado" style="padding:11px; border-radius:8px; border:1px solid var(--border);">
+                    <label>Estado del Curso${isEdit ? ' (No editable)' : ''}</label>
+                    <select id="f-estado" style="padding:11px; border-radius:8px; border:1px solid var(--border); ${isEdit ? 'background:#F3F4F6; cursor:not-allowed;' : ''}" ${isEdit ? 'disabled' : ''}>
                         <option value="Activo" ${isEdit && m.is_active == 1 ? 'selected' : ''}>Activo</option>
-                        <option value="Inactivo" ${isEdit && m.is_active == 0 ? 'selected' : ''}>Inactivo</option>
+                        <option value="Inactivo" ${isEdit && m.is_active !== 1 ? 'selected' : ''}>Inactivo</option>
                     </select>
                 </div>
                 <div class="filter-group">
-                    <label>Año *</label>
-                    <select id="f-anio" style="padding:11px; border-radius:8px; border:1px solid var(--border);">
+                    <label>Año *${isEdit ? ' (No editable)' : ''}</label>
+                    <select id="f-anio" style="padding:11px; border-radius:8px; border:1px solid var(--border); ${isEdit ? 'background:#F3F4F6; cursor:not-allowed;' : ''}" ${isEdit ? 'disabled' : ''}>
                         <option value="">Seleccionar Año</option>
                         <option value="1° año" ${isEdit && m.anio === '1° año' ? 'selected' : ''}>1° año</option>
                         <option value="2° año" ${isEdit && m.anio === '2° año' ? 'selected' : ''}>2° año</option>
@@ -261,8 +263,8 @@ function renderForm(m) {
                     </select>
                 </div>
                 <div class="filter-group" style="grid-column: span 3;">
-                    <label>Descripción / Síntesis</label>
-                    <textarea id="f-desc" rows="4" style="padding:15px; border-radius:8px; border:1px solid var(--border);">${isEdit ? m.descripcion : ''}</textarea>
+                    <label>Descripción / Síntesis${isEdit ? ' (Editable)' : ''}</label>
+                    <textarea id="f-desc" rows="4" style="padding:15px; border-radius:8px; ${isEdit ? 'border: 2px solid #3B82F6;' : 'border:1px solid var(--border);'}">${isEdit ? m.descripcion : ''}</textarea>
                 </div>
             </div>
             <div style="display:flex; justify-content:flex-end; gap:15px; margin-top:30px;">
@@ -277,19 +279,25 @@ function renderForm(m) {
 // GUARDAR DATOS (CREAR / EDITAR)
 // ------------------------------------------
 async function saveData(id) {
-    const anio = document.getElementById('f-anio').value.replace(/[^\d]/g, '');
-    if (!anio) {
+    const anioSelect = document.getElementById('f-anio');
+    const anio = anioSelect.disabled ? anioSelect.selectedOptions[0]?.value.replace(/[^\d]/g, '') : anioSelect.value.replace(/[^\d]/g, '');
+
+    if (!anio && !id) {
         showToast("Por favor, seleccione el Año.", "warning");
         return;
     }
 
     const data = {
-        anio: anio,
         codigo: document.getElementById('f-codigo').value,
-        nombre: document.getElementById('f-nombre').value,
-        descripcion: document.getElementById('f-desc').value,
-        is_active: document.getElementById('f-estado').value === 'Activo' ? 1 : 0
+        descripcion: document.getElementById('f-desc').value
     };
+
+    // Solo incluir nombre y anio si estamos creando (no editando)
+    if (!id) {
+        data.anio = anio;
+        data.nombre = document.getElementById('f-nombre').value;
+        data.is_active = document.getElementById('f-estado').value === 'Activo' ? 1 : 0;
+    }
 
     try {
         let response;
@@ -325,29 +333,20 @@ async function saveData(id) {
 }
 
 // ------------------------------------------
-// BORRAR
+// BORRAR - DESHABILITADO
 // ------------------------------------------
+// Las materias no pueden ser eliminadas una vez creadas
 let idDel = null;
-function openDelete(id) { idDel = id; document.getElementById('delete-modal').style.display = 'flex'; }
-function closeDel() { document.getElementById('delete-modal').style.display = 'none'; }
+function openDelete(id) {
+    showToast('Las materias no pueden ser eliminadas', 'warning');
+}
+function closeDel() {
+    document.getElementById('delete-modal').style.display = 'none';
+}
 
 async function confirmDel() {
-    try {
-        const response = await fetch(`${API_BASE}/delete/${idDel}`, {
-            method: 'DELETE'
-        });
-        const result = await response.json();
-        if (response.ok) {
-            showToast(result.message, "success");
-            closeDel();
-            showView('catalogo');
-        } else {
-            showToast(result.error || 'Error al eliminar', "error");
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        showToast('Error de conexión con el servidor', "error");
-    }
+    showToast('Esta operación está deshabilitada', 'error');
+    closeDel();
 }
 
 // Al cargar la página, mostrar el catálogo
