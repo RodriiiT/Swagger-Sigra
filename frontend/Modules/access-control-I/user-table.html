@@ -227,8 +227,7 @@
       }
 
       function renderUsers(users = []) {
-        const actionButtons = actionButtonsFactory()
-
+        if (!tbody) return
         if (!users.length) {
           tbody.innerHTML = '<tr><td colspan="6">No hay usuarios registrados.</td></tr>'
           renderPagination(0)
@@ -240,6 +239,8 @@
         const start = (currentPage - 1) * PAGE_SIZE
         const pageUsers = users.slice(start, start + PAGE_SIZE)
 
+        const makeActions = actionButtonsFactory()
+
         const rows = pageUsers.map((user) => {
           const roleId = Number(user.role_id)
           const role = ROLE_LABELS[roleId] || `Rol ${roleId || 'N/D'}`
@@ -247,6 +248,7 @@
           const name = [user.first_name, user.last_name].filter(Boolean).join(' ').trim() || 'Sin nombre'
           const email = user.email || 'Sin correo'
           const isActive = user.is_active ?? true
+          const actions = makeActions(user)
 
           return `
             <tr>
@@ -255,50 +257,13 @@
               <td>${role}</td>
               <td>${badge(isActive)}</td>
               <td>${email}</td>
-              <td class="actions-cell">
-                ${actionButtons(user)}
-              </td>
+              <td>${actions}</td>
             </tr>
           `
         })
 
         tbody.innerHTML = rows.join('')
         renderPagination(totalPages)
-      }
-
-      function getDisplayName(user) {
-        const name = [user.first_name, user.last_name].filter(Boolean).join(' ').trim()
-        return name || user.email || `Usuario #${user.user_id}`
-      }
-
-      async function toggleUserActive(user) {
-        const loggedRoleId = getLoggedRoleId()
-        if (loggedRoleId === 4 && Number(user.role_id) === 2) {
-          return
-        }
-        const nombre = getDisplayName(user)
-        const nextState = !Boolean(user.is_active)
-        const question = nextState ? `¿Activar a "${nombre}"?` : `¿Desactivar a "${nombre}"?`
-        const ok = window.confirm(question)
-        if (!ok) return
-        try {
-          const response = await fetch(`${API_BASE}/update/${user.user_id}`, {
-            method: 'PATCH',
-            headers: {
-              'Content-Type': 'application/json',
-              ...getAuthHeaders()
-            },
-            body: JSON.stringify({ is_active: nextState })
-          })
-          if (!response.ok) {
-            const err = await response.json().catch(() => ({}))
-            throw new Error(err.error || 'No se pudo actualizar el estado del usuario')
-          }
-          await loadUsers()
-        } catch (error) {
-          alert(error.message)
-          console.error('Error cambiando estado de usuario:', error)
-        }
       }
 
       function attachActions() {
