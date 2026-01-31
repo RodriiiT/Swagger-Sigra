@@ -11,24 +11,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     const nameLabel = document.getElementById('prof-user-name');
     if (nameLabel) nameLabel.textContent = `${user.first_name} ${user.last_name}`;
 
-    try {
-        const res = await fetch(`${API_URL}/assignments/teacher/${user.user_id}/courses`);
-        const data = await res.json();
-
-        if (res.ok && data.courses && data.courses.length > 0) {
-            const assignment = data.courses[0];
-            sessionStorage.setItem('active_assignment', assignment.assignment_id);
-            // 3. Ejecutar cargas iniciales
-            cargarActividadesProf(assignment.assignment_id);
-            cargarMaterialApoyo(assignment.assignment_id); 
-        }
-    } catch (error) {
-        console.error("Error en la carga inicial:", error);
-    }
+    // No seleccionamos automáticamente una asignación aquí: el profesor
+    // verá primero la lista de cursos y elegirá uno.
     const formRecurso = document.getElementById('form-nuevo-recurso');
     if (formRecurso) {
         formRecurso.addEventListener('submit', manejarSubidaRecurso);
     }
+    // Cargar listado de cursos del profesor para la vista "Inicio" y mostrarla
+    cargarCursosProfesor();
+    showSection('inicio');
 });
 // --- 1. FUNCIÓN: CARGAR ACTIVIDADES (TAREAS) ---
 async function cargarActividadesProf(assignmentId) {
@@ -102,6 +93,98 @@ async function cargarMaterialApoyo() {
     } catch (e) { 
         console.error("Error cargando recursos:", e); 
     }
+}
+
+// --- FUNCIÓN: CARGAR TODOS LOS CURSOS DEL PROFESOR ---
+async function cargarCursosProfesor() {
+    const user = JSON.parse(localStorage.getItem('sigra_user'));
+    if (!user) return;
+    try {
+        const res = await fetch(`${API_URL}/assignments/teacher/${user.user_id}/courses`);
+        const data = await res.json();
+        const cont = document.getElementById('lista-cursos-prof');
+        if (!cont) return;
+        cont.innerHTML = '';
+        const courses = data.courses || [];
+        if (courses.length === 0) {
+            cont.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:#888;">No tienes cursos asignados.</p>';
+            return;
+        }
+        // Render cards with improved visuals
+        cont.innerHTML = courses.map(c => {
+            const teacher = escapeHtml(c.teacher_name || '');
+            const subject = escapeHtml(c.subject_name || 'Materia');
+            const grade = escapeHtml(c.grade_name || '');
+            const section = escapeHtml(c.section_name || '');
+            const year = escapeHtml(c.name || c.academic_year || '');
+            return `
+            <div class="course-card" onclick="selectAssignment(${c.assignment_id})" tabindex="0" onkeydown="if(event.key==='Enter'){ selectAssignment(${c.assignment_id}); }" role="button" aria-pressed="false" style="border-radius:12px; overflow:hidden; background:linear-gradient(135deg, #ffffff 0%, #f7fbff 100%);">
+                <div class="course-card-content" style="padding:16px; display:flex; gap:12px; align-items:center;">
+                    <div class="course-avatar" aria-hidden="true">
+                        ${subject.split(' ').map(s=>s[0]||'').slice(0,2).join('').toUpperCase()}
+                    </div>
+                    <div style="flex:1;">
+                        <div class="course-title">${subject}</div>
+                        <div class="course-meta">${grade} • ${section} ${year ? '• ' + year : ''}</div>
+                    </div>
+                    <div style="text-align:right; font-size:0.85rem; color:#777;">
+                        ${teacher ? `<div style="font-weight:600;">${teacher}</div>` : ''}
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+    } catch (err) {
+        console.error('Error cargando cursos del profesor:', err);
+    }
+}
+
+// Seleccionar una asignación (curso) y cargar su contenido
+function selectAssignment(assignmentId) {
+    if (!assignmentId) return;
+    sessionStorage.setItem('active_assignment', assignmentId);
+    // Actualizamos el título del curso seleccionado y cargamos las vistas relacionadas
+    updateCurrentCourseTitle(assignmentId);
+    renderCourseShortcuts(assignmentId);
+    // No cargamos datos todavía: esperamos que el profesor elija un subatajo.
+    // Mostramos la vista principal del curso con los subatajos.
+    // El subatajo específico se encargará de llamar al loader correspondiente.
+    showSection('mi-curso');
+}
+
+// Obtener detalles de la asignación y actualizar el título mostrado en la vista
+async function updateCurrentCourseTitle(assignmentId) {
+    const el = document.getElementById('current-course-title');
+    if (!el) return;
+    try {
+        const res = await fetch(`${API_URL}/assignments/course/${assignmentId}`);
+        const data = await res.json();
+        if (res.ok && data.course) {
+            const c = data.course;
+            const subject = c.subject_name || c.subject || '';
+            const section = c.section_name || '';
+            const grade = c.grade_name || '';
+            const year = c.academic_year || c.name || '';
+            el.textContent = `${subject} — ${grade} ${section} ${year ? `(${year})` : ''}`;
+        } else {
+            el.textContent = 'Curso seleccionado';
+        }
+    } catch (err) {
+        console.error('Error obteniendo detalles de la asignación:', err);
+        el.textContent = 'Curso seleccionado';
+    }
+}
+
+// Renderiza los sub-atajos para el curso seleccionado
+function renderCourseShortcuts(assignmentId) {
+    const cont = document.getElementById('course-shortcuts');
+    if (!cont) return;
+    cont.innerHTML = `
+        <button class="btn btn-sm" onclick="(function(){ sessionStorage.setItem('active_assignment', ${assignmentId}); cargarMaterialApoyo(); showSection('mi-curso'); })()" style="background:#123E6A; color:white; padding:8px 10px; border-radius:6px;">Recursos Didácticos</button>
+        <button class="btn btn-sm" onclick="(function(){ sessionStorage.setItem('active_assignment', ${assignmentId}); cargarListaAlumnos(); showSection('alumnos'); })()" style="background:#2ecc71; color:white; padding:8px 10px; border-radius:6px;">Alumnos</button>
+        <button class="btn btn-sm" onclick="(function(){ sessionStorage.setItem('active_assignment', ${assignmentId}); cargarTareas(); showSection('crear-tarea'); })()" style="background:#f39c12; color:white; padding:8px 10px; border-radius:6px;">Actividades</button>
+        <button class="btn btn-sm" onclick="(function(){ sessionStorage.setItem('active_assignment', ${assignmentId}); cargarTablaAsistencia(); showSection('asistencia'); })()" style="background:#3498db; color:white; padding:8px 10px; border-radius:6px;">Asistencia</button>
+        <button class="btn btn-sm" onclick="(function(){ sessionStorage.setItem('active_assignment', ${assignmentId}); cargarEntregasParaCalificar(); showSection('tareas-recibidas'); })()" style="background:#9b59b6; color:white; padding:8px 10px; border-radius:6px;">Calificaciones</button>
+    `;
 }
 function abrirModalRecurso() {
     const modal = document.getElementById('modal-recurso');
@@ -423,8 +506,9 @@ function showSection(sectionId) {
     const target = document.getElementById(sectionId);
     if (target) {
         target.style.display = 'block';
-        if (sectionId === 'mi-curso') cargarMaterialApoyo();{
-        }if (sectionId === 'alumnos' || sectionId === 'asistencia') {
+        if (sectionId === 'mi-curso') cargarMaterialApoyo();
+        if (sectionId === 'inicio') cargarCursosProfesor();
+        if (sectionId === 'alumnos' || sectionId === 'asistencia') {
             cargarListaAlumnos();
         } else if (sectionId === 'crear-tarea') {
             cargarTareas(); 
@@ -681,4 +765,10 @@ Object.assign(window, {
     refreshSubmissions: cargarEntregasParaCalificar,
     openGradeModal,
     closeGradeModal
+    ,
+    cargarCursosProfesor,
+    selectAssignment,
+    updateCurrentCourseTitle
+    ,
+    renderCourseShortcuts
 });

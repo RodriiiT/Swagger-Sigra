@@ -3,7 +3,7 @@
 // ==========================================
 
 const viewContainer = document.getElementById('view-container');
-const API_BASE = 'http://localhost:3000/api/subjects'; // Backend local
+const API_BASE = 'https://sigra.irissoftware.lat/api/subjects'; // Backend local
 
 let materias = []; // Array global para las materias
 let currentPage = 1;

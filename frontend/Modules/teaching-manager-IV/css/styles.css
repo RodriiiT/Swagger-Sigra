@@ -162,3 +162,27 @@ th { background-color: var(--color-identity-blue); color: white; }
     .field-group { grid-template-columns: 1fr; }
     .profile-page { padding: 0 12px; }
 }
+
+/* --- Cursos: tarjetas estilo mejorado --- */
+.course-card {
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    cursor: pointer;
+    border: 1px solid rgba(18,62,106,0.06);
+}
+.course-card:focus, .course-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 30px rgba(18,62,106,0.12);
+    border-color: rgba(18,62,106,0.14);
+    outline: none;
+}
+.course-card-content { display:flex; align-items:center; }
+.course-avatar {
+    width:64px; height:64px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+    background: linear-gradient(135deg,#123E6A,#2a86c7); color:#fff; font-weight:800; font-size:1.25rem;
+}
+.course-title { font-size:1.05rem; font-weight:700; color:var(--color-identity-blue); }
+.course-meta { font-size:0.9rem; color:#556; margin-top:6px; }
+
+@media (max-width: 700px) {
+    .course-avatar { width:52px; height:52px; }
+}

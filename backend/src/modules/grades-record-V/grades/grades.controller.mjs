@@ -93,6 +93,11 @@ export class GradesLogController {
             }
             const result = await this.model.addGradeLogEntry(validation.data);
             if(result.error) return res.status(400).json({error: result.error});
+            res.locals.notify = {
+                userId: result.grade.student_user_id,
+                message: `Se ha registrado una nueva calificación: ${result.grade.score}`,
+                type: 'notification'
+            }
             return res.status(201).json({
                 message: result.message,
                 grade: result.grade
@@ -119,6 +124,11 @@ export class GradesLogController {
             }
             const result = await this.model.updateGradeLogEntry(gradeLogId, validation.data);
             if(result.error) return res.status(400).json({error: result.error});
+            res.locals.notify = {
+                userId: result.grade.student_user_id,
+                message: `Se ha actualizado una calificación: ${result.grade.score}`,
+                type: 'notification'
+            }
             return res.status(200).json({
                 message: result.message,
                 grade: result.grade
@@ -138,6 +148,11 @@ export class GradesLogController {
         try{
             const result = await this.model.deleteGradeLogEntry(gradeLogId);
             if(result.error) return res.status(400).json({error: result.error});
+            res.locals.notify = {
+                userId: result.grade.student_user_id,
+                message: `Se ha eliminado una calificación.`,
+                type: 'notification'
+            }
             return res.status(200).json({
                 message: result.message
             });

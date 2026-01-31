@@ -16,7 +16,7 @@
         </div>
         <div class="nav-links">
             <a href="#" onclick="showSection('inicio')" class="active">Inicio</a>
-            <a href="#" onclick="showSection('mi-curso')">Mi Curso</a>
+            <!-- Inicio mostrará la lista de cursos -->
             <a href="#" onclick="showSection('alumnos')">Alumnos</a>
             <a href="#" onclick="showSection('crear-tarea')">Gestión Tareas</a>
             <a href="#" onclick="showSection('tareas-recibidas')">Calificar</a>
@@ -38,35 +38,19 @@
     <main class="container">
         
         <section id="inicio" class="view-section active">
-            <h2>Bienvenido, Profesor</h2>
-            <p>Seleccione una opción para gestionar sus actividades académicas.</p>
-            <div class="card-grid">
-                <div class="card" onclick="showSection('mi-curso')" style="cursor:pointer">
-                    <h3><i class="fas fa-book"></i> Mi Curso</h3>
-                    <p>Ver Material del curso.</p>
-                </div>
-                <div class="card" onclick="showSection('alumnos')" style="cursor:pointer">
-                    <h3><i class="fas fa-users"></i> Listado Alumnos</h3>
-                    <p>Ver inscritos y exportar listas.</p>
-                </div>
-                <div class="card" onclick="showSection('tareas-recibidas')" style="cursor:pointer">
-                    <h3><i class="fas fa-check-double"></i> Corregir Tareas</h3>
-                    <p>Calificar entregas pendientes.</p>
-                </div>
-                <div class="card" onclick="showSection('asistencia')" style="cursor:pointer">
-                    <h3><i class="fas fa-calendar-check"></i> Asistencia</h3>
-                    <p>Gestionar y reportar asistencia.</p>
-                </div>
-                <div class="card" onclick="showSection('crear-tarea')" style="cursor:pointer">
-                    <h3><i class="fas fa-clipboard-list"></i> Asignaciones</h3>
-                    <p>Crear nuevas tareas</p>
-                </div>
+            <h2><i class="fas fa-chalkboard-teacher"></i> Mis Cursos</h2>
+            <p style="color:#666; font-size:0.9em;">Seleccione el curso para acceder a sus herramientas: Recursos, Alumnos, Actividades, Asistencia y Calificaciones.</p>
+
+            <div id="lista-cursos-prof" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap:12px; margin-top:12px;">
+                <p style="grid-column:1/-1; text-align:center; color:#888;">Cargando cursos asignados...</p>
             </div>
         </section>
+        <!-- 'mis-cursos' sección eliminada: ahora se usa 'inicio' como lista de cursos -->
         <section id="mi-curso" class="view-section">
     <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <div>
             <h2><i class="fas fa-archive"></i> Repositorio de Material</h2>
+            <div id="current-course-title" style="font-size:0.95rem; color:#333; margin-top:6px; font-weight:600;">Seleccione un curso en "Mis Cursos" o elija uno activo</div>
             <p style="color: #666; font-size: 0.9em;">Guías, lecturas y recursos para los alumnos.</p>
         </div>
         <button class="btn-primario" onclick="abrirModalRecurso()" style="background: #123E6A; color: white; padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer;">
@@ -74,9 +58,12 @@
         </button>
     </div>
 
-    <div id="repo-material-apoyo" style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+        <div id="repo-material-apoyo" style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+        <div id="course-shortcuts" style="display:flex; gap:8px; margin-bottom:12px;">
+            <!-- Sub-atajos por curso (se rellenan al seleccionar un curso) -->
+        </div>
         <div id="lista-recursos" class="recursos-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">
-            <p style="text-align: center; color: #999;">Cargando biblioteca de recursos...</p>
+            <p style="text-align: center; color: #999;">Selecciona <strong>Recursos Didácticos</strong> en los subatajos para cargar archivos de este curso.</p>
         </div>
     </div>
 </section>

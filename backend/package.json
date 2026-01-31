@@ -8,7 +8,8 @@
     "dev": "nodemon app.mjs",
     "seed": "node database/seed/seed.database.mjs",
     "clean:uploads": "node scripts/cleanup_uploads.mjs",
-    "ensure:enrollments": "node scripts/ensure_enrollments.mjs"
+    "ensure:enrollments": "node scripts/ensure_enrollments.mjs",
+    "seed:prelacies": "node database/seed/generate-automatic-prelacies.mjs"
   },
   "type": "module",
   "keywords": [],

@@ -111,6 +111,11 @@ export class ControlController {
 				});
 			}
 			const result = await this.model.createUser(validation.data);
+			res.locals.notify = {
+				userId: result.user.user_id,
+				message: 'Usuario creado exitosamente',
+				type: 'notification'
+			}
 			if(result.error) return res.status(400).json({error: result.error});
 			return res.status(201).json({
 				message: result.message,
@@ -135,6 +140,11 @@ export class ControlController {
 			}
 			const result = await this.model.loginUser(validation.data);
 			if(result.error) return res.status(400).json({error: result.error});
+			res.locals.notify = {
+				userId: result.user.user_id,
+				message: 'Inicio de sesión exitoso',
+				type: 'notification'
+			}
 			return res.status(200).json({
 				message: result.message,
 				user: result.user,
