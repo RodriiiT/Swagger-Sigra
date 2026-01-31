@@ -46,24 +46,24 @@ export class subjectModel {
         }
     }
 
-    // Metodo para obtener materias por grado
+    // Metodo para obtener materias ASIGNADAS por grado (is_active = 1)
     static async getSubjectsByGrade(gradeId) {
         if (!gradeId) return { error: "El ID del grado es requerido" }
         const [subjects] = await db.query(
             `SELECT s.*, g.grade_name
              FROM subjects s
              JOIN grades g ON s.grade_id = g.grade_id
-             WHERE s.grade_id = ?`,
+             WHERE s.grade_id = ? AND s.is_active = 1`,
             [gradeId]
         );
-        if (subjects.length === 0) return { error: "No se han encontrado materias para este grado" }
+        if (subjects.length === 0) return { error: "No se han encontrado materias asignadas para este grado" }
         // Map grade_name to anio for frontend compatibility
         const mappedSubjects = subjects.map(subject => ({
             ...subject,
             anio: subject.grade_name
         }));
         return {
-            message: "Materias obtenidas exitosamente",
+            message: "Materias asignadas obtenidas exitosamente",
             subjects: mappedSubjects
         }
     }
@@ -92,10 +92,10 @@ export class subjectModel {
         if (existingGrade.length === 0 || exisitingSubject.length > 0) {
             return { error: 'Grado no encontrado o materia ya existe' };
         }
-        // Si todo esta bien, se crea la materia
+        // Si todo esta bien, se crea la materia (is_active = 0 por defecto, no asignada)
         const [result] = await db.query(
-            `INSERT INTO subjects (grade_id, subject_name, code_subject, description)
-            VALUES (?, ?, ?, ?)`,
+            `INSERT INTO subjects (grade_id, subject_name, code_subject, description, is_active)
+            VALUES (?, ?, ?, ?, 0)`,
             [grade_id, rest.subject_name, rest.code_subject, rest.description]
         );
         // Se obtiene la materia creada con grade_name
@@ -239,3 +239,4 @@ export class subjectModel {
         return { message: "Materia eliminada exitosamente" }
     }
 }
+
