@@ -39,8 +39,7 @@ export function poblarSelectGrados(selectEl, grados, gradoIdActual) {
 	selectEl.innerHTML = grados
 		.map(
 			(g) =>
-				`<option value="${g.id}" ${
-					g.id === gradoIdActual ? "selected" : ""
+				`<option value="${g.id}" ${g.id === gradoIdActual ? "selected" : ""
 				}>${g.nombre}</option>`
 		)
 		.join("");
