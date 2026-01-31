@@ -1,4 +1,4 @@
-const API_BASE = 'https://sigra.irissoftware.lat/api';
+const API_BASE = 'http://localhost:3000/api';
 
 // Estado de la aplicación
 const state = {
@@ -159,12 +159,20 @@ function renderizarGrados() {
 }
 
 function renderizarSecciones() {
-    elements.selectSeccion.innerHTML = '<option value="">-- Seleccione una sección --</option>';
+    if (state.sections.length === 0) {
+        elements.selectSeccion.innerHTML = '<option value="">-- No hay secciones --</option>';
+        return;
+    }
 
+    elements.selectSeccion.innerHTML = '<option value="">-- Seleccione una sección --</option>';
     state.sections.forEach(section => {
+        const isClosed = section.is_active === 0;
         const option = document.createElement('option');
         option.value = section.section_id;
-        option.textContent = `Sección ${section.section_name}`;
+        option.textContent = `Sección ${section.section_name}${isClosed ? ' (🔒 CERRADA)' : ''}`;
+        if (isClosed) {
+            option.style.color = '#ef4444';
+        }
         elements.selectSeccion.appendChild(option);
     });
 }
@@ -181,11 +189,14 @@ function renderizarAsignaciones() {
 }
 
 function renderizarHorarios() {
+    const selectedSec = state.sections.find(s => s.section_id == state.currentSection);
+    const isClosed = selectedSec && selectedSec.is_active === 0;
+
     if (state.schedules.length === 0) {
         elements.tablaHorarios.innerHTML = `
             <tr>
                 <td colspan="7" style="text-align: center; padding: 40px; color: #6b7280;">
-                    No hay horarios configurados para esta sección
+                    ${isClosed ? '🚫 Esta sección está cerrada. No se pueden configurar horarios.' : 'No hay horarios configurados para esta sección'}
                 </td>
             </tr>
         `;
@@ -214,6 +225,7 @@ function renderizarHorarios() {
                                 class="btn btn--accion" 
                                 onclick="editarHorario(${horario.schedule_id})"
                                 title="Editar horario"
+                                ${isClosed ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}
                             >
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" 
@@ -226,7 +238,8 @@ function renderizarHorarios() {
                                 class="btn btn--accion" 
                                 onclick="confirmarEliminar(${horario.schedule_id})"
                                 title="Eliminar horario"
-                                style="color: #dc2626;"
+                                style="color: #dc2626; ${isClosed ? 'opacity:0.5; cursor:not-allowed;' : ''}"
+                                ${isClosed ? 'disabled' : ''}
                             >
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                                     <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6" 
@@ -405,11 +418,21 @@ elements.selectSeccion.addEventListener('change', async (e) => {
     state.currentSection = e.target.value;
 
     if (state.currentSection) {
+        const selectedSec = state.sections.find(s => s.section_id == state.currentSection);
+        const isClosed = selectedSec && selectedSec.is_active === 0;
+
+        // Bloquear botón de nuevo horario si está cerrada
+        elements.btnNuevoHorario.disabled = isClosed;
+        elements.btnNuevoHorario.style.opacity = isClosed ? '0.5' : '1';
+        elements.btnNuevoHorario.style.cursor = isClosed ? 'not-allowed' : 'pointer';
+
         await cargarAsignaciones(state.currentSection);
         await cargarHorarios(state.currentSection);
     } else {
         state.schedules = [];
         renderizarHorarios();
+        elements.btnNuevoHorario.disabled = false;
+        elements.btnNuevoHorario.style.opacity = '1';
     }
 });
 
@@ -418,6 +441,13 @@ elements.btnNuevoHorario.addEventListener('click', () => {
         mostrarError('Debe seleccionar un año y una sección primero');
         return;
     }
+
+    const selectedSec = state.sections.find(s => s.section_id == state.currentSection);
+    if (selectedSec && selectedSec.is_active === 0) {
+        mostrarError('No se pueden añadir horarios a una sección cerrada.');
+        return;
+    }
+
     abrirModal('crear');
 });
 
