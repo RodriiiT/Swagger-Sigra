@@ -23,7 +23,7 @@ export class SectionModel {
     static async getSectionsByGrade(gradeId) {
         if (!gradeId) return { error: 'El ID del grado es requerido' };
         const [sections] = await db.query(
-            `SELECT s.section_id, s.section_name, s.capacity, s.number_of_students, s.grade_id, g.grade_name
+            `SELECT s.section_id, s.section_name, s.capacity, s.number_of_students, s.grade_id, g.grade_name, s.is_active
             FROM sections s
             JOIN grades g ON s.grade_id = g.grade_id
             JOIN academic_years ay ON s.academic_year_id = ay.year_id
@@ -104,7 +104,7 @@ export class SectionModel {
     // Método para actualizar una sección académica
     static async updateSection(sectionId, data) {
         if (!sectionId || !data) return { error: 'El ID de la sección y los datos son requeridos' };
-        const allowedFields = ['section_name', 'capacity'];
+        const allowedFields = ['section_name', 'capacity', 'is_active'];
         const updateToFields = {};
         for (const field of allowedFields) {
             if (data[field] !== undefined) {
