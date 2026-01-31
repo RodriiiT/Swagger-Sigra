@@ -29,9 +29,8 @@
                 <a href="../academic-structure-II/gestion-materias/index.html" role="listitem">Materias</a>
                 <a href="../academic-structure-II/definicion-prelaciones/index.html" role="listitem">Prelaciones</a>
                 <a href="../academic-structure-II/gestion-horarios/index.html" role="listitem">Horarios</a>
-                <a href="../academic-structure-II/Gestionar Asignaciones/index.html" role="listitem"> Inscripción</a>
-                <a href="../academic-structure-II/Gestionar Asignaciones/gestionar-asignacion.html"
-                    role="listitem">Asignacion</a>
+                <a href="../academic-structure-II/Gestionar%20Asignaciones/gestionar-asignacion-unified.html"
+                    role="listitem">Asignación</a>
             </div>
 
             <div class="profile-menu" aria-label="Menú de perfil">
@@ -207,7 +206,7 @@
                     </a>
 
                     <!-- Gestionar Asignaciones -->
-                    <a href="../academic-structure-II/Gestionar%20Asignaciones/index.html"
+                    <a href="../academic-structure-II/Gestionar%20Asignaciones/gestionar-asignacion-unified.html"
                         class="module-card module-purple">
                         <div class="module-icon">
                             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -219,7 +218,7 @@
                         </div>
                         <div class="module-content">
                             <h4 class="module-title">Gestionar Asignaciones</h4>
-                            <p class="module-description">Asigna profesores a materias y secciones</p>
+                            <p class="module-description">Asigna estudiantes y profesores a secciones</p>
                         </div>
                         <div class="module-arrow">
                             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -229,106 +228,110 @@
                         </div>
                     </a>
 
-                </div>
-            </section>
-
-            <!-- Tabla de Materias Recientes -->
-            <section class="table-section">
-                <div class="section-header">
-                    <h3 class="section-title">Listado de Materias</h3>
-                    <a href="../academic-structure-II/catalogo-materias/index.html" class="view-all-link">
-                        Ver todas
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="m9 18 6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                        </svg>
                     </a>
-                </div>
 
-                <div class="table-container">
-                    <div class="loading-state" id="loading-subjects">
-                        <div class="spinner"></div>
-                        <p>Cargando materias...</p>
-                    </div>
-
-                    <div class="empty-state" id="empty-subjects" style="display: none;">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15Z"
-                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                        </svg>
-                        <p>No hay materias registradas</p>
-                    </div>
-
-                    <table class="data-table" id="subjects-table" style="display: none;">
-                        <thead>
-                            <tr>
-                                <th>Código</th>
-                                <th>Nombre</th>
-                                <th>Año</th>
-                                <th>Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody id="subjects-tbody">
-                            <!-- Datos cargados dinámicamente -->
-                        </tbody>
-                    </table>
                 </div>
             </section>
 
-            <!-- Tabla de Secciones -->
-            <section class="table-section">
-                <div class="section-header">
-                    <h3 class="section-title">Secciones del Colegio</h3>
-                    <a href="../academic-structure-II/Gestionar Asignaciones/index.html" class="view-all-link">
-                        Gestionar
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="m9 18 6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                        </svg>
-                    </a>
+        </div>
+        </section>
+
+        <!-- Tabla de Materias Recientes -->
+        <section class="table-section">
+            <div class="section-header">
+                <h3 class="section-title">Listado de Materias</h3>
+                <a href="../academic-structure-II/catalogo-materias/index.html" class="view-all-link">
+                    Ver todas
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="m9 18 6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                </a>
+            </div>
+
+            <div class="table-container">
+                <div class="loading-state" id="loading-subjects">
+                    <div class="spinner"></div>
+                    <p>Cargando materias...</p>
                 </div>
 
-                <div class="table-container">
-                    <div class="loading-state" id="loading-sections">
-                        <div class="spinner"></div>
-                        <p>Cargando secciones...</p>
-                    </div>
-
-                    <div class="empty-state" id="empty-sections" style="display: none;">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M18 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm0 0v-3m0-11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm0 0v3m0 0a6 6 0 0 1-6 6m6-6a6 6 0 0 0-6 6m0 0a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm0 0v-3m-6-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm0 0v3"
-                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                        </svg>
-                        <p>No hay secciones registradas</p>
-                    </div>
-
-                    <table class="data-table" id="sections-table" style="display: none;">
-                        <thead>
-                            <tr>
-                                <th>Grado</th>
-                                <th>Sección</th>
-                                <th>Capacidad</th>
-                                <th>Año Escolar</th>
-                                <th>Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody id="sections-tbody">
-                            <!-- Datos cargados dinámicamente -->
-                        </tbody>
-                    </table>
+                <div class="empty-state" id="empty-subjects" style="display: none;">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15Z"
+                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <p>No hay materias registradas</p>
                 </div>
-            </section>
+
+                <table class="data-table" id="subjects-table" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Nombre</th>
+                            <th>Año</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="subjects-tbody">
+                        <!-- Datos cargados dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Tabla de Secciones -->
+        <section class="table-section">
+            <div class="section-header">
+                <h3 class="section-title">Secciones del Colegio</h3>
+                <a href="../academic-structure-II/Gestionar%20Asignaciones/gestionar-asignacion-unified.html"
+                    class="view-all-link">
+                    Gestionar
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="m9 18 6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                </a>
+            </div>
+
+            <div class="table-container">
+                <div class="loading-state" id="loading-sections">
+                    <div class="spinner"></div>
+                    <p>Cargando secciones...</p>
+                </div>
+
+                <div class="empty-state" id="empty-sections" style="display: none;">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M18 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm0 0v-3m0-11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm0 0v3m0 0a6 6 0 0 1-6 6m6-6a6 6 0 0 0-6 6m0 0a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm0 0v-3m-6-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm0 0v3"
+                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <p>No hay secciones registradas</p>
+                </div>
+
+                <table class="data-table" id="sections-table" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th>Grado</th>
+                            <th>Sección</th>
+                            <th>Capacidad</th>
+                            <th>Año Escolar</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sections-tbody">
+                        <!-- Datos cargados dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
 
         </div>
     </main>
 
     <script>
         (function () {
-            const API_BASE = 'https://sigra.irissoftware.lat/api';
+            const API_BASE = 'http://localhost:3000/api';
 
             // Fetch subjects
             async function loadSubjects() {
