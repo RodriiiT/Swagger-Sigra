@@ -329,6 +329,10 @@ async function cargarListaAlumnos() {
         console.error("Error al procesar la lista:", error);
     }
 }
+
+function cargarAlumnos() {
+    return cargarListaAlumnos();
+}
 async function cargarTablaAsistencia() {
     const assignmentId = sessionStorage.getItem('active_assignment');
     const tablaBody = document.getElementById('lista-asistencia-body'); // Asegúrate de que este ID exista en el HTML
