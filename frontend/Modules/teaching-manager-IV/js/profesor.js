@@ -122,6 +122,10 @@ async function cargarCursosProfesor() {
             cont.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:#888;">No tienes cursos asignados.</p>';
             return;
         }
+        const currentActive = sessionStorage.getItem('active_assignment');
+        if (!currentActive && courses[0]?.assignment_id) {
+            sessionStorage.setItem('active_assignment', String(courses[0].assignment_id));
+        }
         // Render cards with improved visuals
         cont.innerHTML = courses.map(c => {
             const teacher = escapeHtml(c.teacher_name || '');
@@ -145,9 +149,24 @@ async function cargarCursosProfesor() {
                 </div>
             </div>`;
         }).join('');
+        return courses;
     } catch (err) {
         console.error('Error cargando cursos del profesor:', err);
     }
+}
+
+async function ensureActiveAssignment() {
+    let assignmentId = sessionStorage.getItem('active_assignment');
+    if (assignmentId) return assignmentId;
+    const courses = await cargarCursosProfesor();
+    assignmentId = sessionStorage.getItem('active_assignment');
+    if (assignmentId) return assignmentId;
+    if (Array.isArray(courses) && courses[0]?.assignment_id) {
+        assignmentId = String(courses[0].assignment_id);
+        sessionStorage.setItem('active_assignment', assignmentId);
+        return assignmentId;
+    }
+    return null;
 }
 
 // Seleccionar una asignación (curso) y cargar su contenido
@@ -515,7 +534,7 @@ document.getElementById('form-crear-tarea')?.addEventListener('submit', async (e
 });
 
 // --- 5. NAVEGACIÓN Y UTILIDADES ---
-function showSection(sectionId) {
+async function showSection(sectionId) {
     // Oculta todas las secciones
     document.querySelectorAll('main > section').forEach(s => s.style.display = 'none');
     
@@ -523,6 +542,9 @@ function showSection(sectionId) {
     if (target) {
         target.style.display = 'block';
         setActiveNav(sectionId);
+        if (['mi-curso', 'alumnos', 'crear-tarea', 'tareas-recibidas', 'asistencia'].includes(sectionId)) {
+            await ensureActiveAssignment();
+        }
         if (sectionId === 'mi-curso') cargarMaterialApoyo();
         if (sectionId === 'inicio') cargarCursosProfesor();
         if (sectionId === 'alumnos' || sectionId === 'asistencia') {
