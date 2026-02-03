@@ -41,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function showLoading(message = 'Cargando...') {
+    if (!tbody) return
     tbody.innerHTML = `<tr><td colspan="5">${message}</td></tr>`
   }
 

@@ -21,6 +21,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     cargarCursosProfesor();
     showSection('inicio');
 });
+
+function setActiveNav(sectionId) {
+    const links = document.querySelectorAll('.nav-links a');
+    links.forEach(link => {
+        link.classList.remove('active');
+        const onclick = link.getAttribute('onclick') || '';
+        const match = onclick.match(/showSection\(['"]([^'"]+)['"]\)/);
+        if (match && match[1] === sectionId) {
+            link.classList.add('active');
+        }
+    });
+}
 // --- 1. FUNCIÓN: CARGAR ACTIVIDADES (TAREAS) ---
 async function cargarActividadesProf(assignmentId) {
     try {
@@ -506,6 +518,7 @@ function showSection(sectionId) {
     const target = document.getElementById(sectionId);
     if (target) {
         target.style.display = 'block';
+        setActiveNav(sectionId);
         if (sectionId === 'mi-curso') cargarMaterialApoyo();
         if (sectionId === 'inicio') cargarCursosProfesor();
         if (sectionId === 'alumnos' || sectionId === 'asistencia') {
