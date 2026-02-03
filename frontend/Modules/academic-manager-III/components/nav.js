@@ -50,22 +50,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const profileBtn = document.getElementById('profile-button');
     const profileDropdown = document.getElementById('profile-dropdown');
 
+    function normalizePath(path) {
+      const trimmed = path.replace(/\/+$/, '');
+      const lastSegment = trimmed.split('/').pop() || '';
+      return lastSegment.replace(/\.html?$/i, '');
+    }
+
     function highlightCurrentPage() {
-        const currentFilename = window.location.pathname.split('/').pop();
-        const links = document.querySelectorAll('.nav-links a');
+      const currentSegment = normalizePath(window.location.pathname);
+      const links = document.querySelectorAll('.nav-links a');
 
-        links.forEach(link => {
-            link.classList.remove('active');
-            
-            // Obtiene el nombre del archivo del enlace (ej: "manager.view.html")
-            const linkHref = link.getAttribute('href');
-            const targetFilename = linkHref.split('/').pop();
+      links.forEach(link => {
+        link.classList.remove('active');
 
-            // Si el archivo de la URL coincide exactamente con el del href
-            if (currentFilename === targetFilename) {
-                link.classList.add('active');
-            }
-        });
+        const linkUrl = new URL(link.getAttribute('href'), window.location.href);
+        const targetSegment = normalizePath(linkUrl.pathname);
+
+        if (currentSegment && currentSegment === targetSegment) {
+          link.classList.add('active');
+        }
+      });
     }
 
     function getStoredUser() {
