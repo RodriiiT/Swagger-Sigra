@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
 <header class="main-header">
   <nav class="navbar">
     <a href="../../landing/index.html" class="brand">
-      <img class="brand-logo" src="/frontend/Public/resources/Modulo-1/logo.png" alt="Logo SIGRA" onerror="this.style.display='none'"/>
+      <img class="brand-logo" src="../../Public/resources/Modulo-1/logo.png" alt="Logo SIGRA" onerror="this.style.display='none'"/>
       <span>SIGRA</span>
     </a>
 
