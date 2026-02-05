@@ -35,7 +35,7 @@
             <li role="none"><button type="button" class="profile-item" data-profile-action="view" role="menuitem">Ver
                 usuario</button></li>
             <li role="none"><button type="button" class="profile-item" data-profile-action="edit" role="menuitem">Editar
-              usuario</button></li>
+                usuario</button></li>
             <li role="none"><button type="button" class="profile-item" data-profile-action="logout"
                 role="menuitem">Cerrar sesión</button></li>
           </ul>
@@ -142,19 +142,18 @@
         const loggedId = loggedUser.id || loggedUser.user_id
         const loggedRoleId = getLoggedRoleId()
 
-        function hasEditPermission(targetUser){
-          // Rules:
-          // - Admin (1) can edit Control de Estudios (4) and themselves, but not other admins, nor professors(2) or students(3)
-          // - Control de Estudios (4) keeps previous restrictions (cannot edit teachers by design)
-          const targetRole = Number(targetUser.role_id)
-          const targetId = Number(targetUser.user_id)
+        function hasEditPermission(targetUser) {
+          const targetId = Number(targetUser.user_id || targetUser.id)
+
+          // Cualquier usuario puede editar su propio perfil
+          if (targetId === Number(loggedId)) return true
+
           if (Number(loggedRoleId) === 1) {
-            if (targetId === Number(loggedId)) return true // can edit self
-            if (targetRole === 4) return true // can edit Control de Estudios
-            return false // cannot edit admins, teachers or students
+            const targetRole = Number(targetUser.role_id)
+            if (targetRole === 4) return true // Admin puede editar Control de Estudios
+            return false
           }
 
-          // Default behavior for non-admins: no edit permission from the table (preserve conservative default)
           return false
         }
 
@@ -428,13 +427,14 @@
         const loggedId = stored.id || stored.user_id
 
         function canEditTarget(targetUser) {
-          const targetRole = Number(targetUser.role_id)
-          const targetId = Number(targetUser.user_id)
-          // Admin (1) can edit Control de Estudios (4) and themselves, but not other admins, nor professors(2) or students(3)
+          const targetId = Number(targetUser.user_id || targetUser.id)
+
+          // Permitir edición propia
+          if (targetId === Number(loggedId)) return true
+
           if (Number(loggedRoleId) === 1) {
-            if (targetId === Number(loggedId)) return true
+            const targetRole = Number(targetUser.role_id)
             if (targetRole === 4) return true
-            return false
           }
           return false
         }
