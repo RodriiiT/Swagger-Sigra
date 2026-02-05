@@ -438,22 +438,27 @@ lista.forEach(t => {
 
 // --- FUNCIÓN PARA ELIMINAR ---
 async function eliminarTarea(id) {
-    if (!confirm('¿Estás seguro de eliminar esta actividad?')) return;
-
     try {
-        // Usando tu ruta específica: /api/activities/delete/{id}
-        const res = await fetch(`${API_URL}/activities/delete/${id}`, {
-            method: 'DELETE'
-        });
-
-        if (res.ok) {
-            alert('Tarea eliminada correctamente');
-            cargarTareas(); 
-        } else {
-            alert('No se pudo eliminar la tarea');
+        // 1. Verificación de entregas
+        const resCheck = await fetch(`${API_URL}/Submission/activities/${id}/submissions`);
+        if (resCheck.ok) {
+            const entregas = await resCheck.json();
+            // Si el array existe y tiene elementos, MANDAMOS EL AVISO y cortamos
+            if (entregas && entregas.length > 0) {
+                alert("⚠️ ALERTA: No se puede borrar esta tarea porque ya tiene entregas de alumnos registradas.");
+                return; 
+            }
+        }
+        // 2. Si pasó la validación, pedir confirmación
+        if (!confirm('¿Estás seguro de que deseas eliminar esta actividad?')) return;
+        const resDelete = await fetch(`${API_URL}/activities/delete/${id}`, { method: 'DELETE' });
+        if (resDelete.ok) {
+            alert("✅ Tarea eliminada correctamente.");
+            cargarTareas();
         }
     } catch (error) {
-        console.error("Error al eliminar:", error);
+        console.error("Error al validar borrado:", error);
+        alert("Ocurrió un error al intentar verificar las entregas.");
     }
 }
 
@@ -483,7 +488,20 @@ function prepararEdicionTarea(id, titulo, desc, peso, fecha) {
 // --- MANEJADOR DEL FORMULARIO (CREAR Y ACTUALIZAR) ---
 document.getElementById('form-crear-tarea')?.addEventListener('submit', async (e) => {
     e.preventDefault();
-
+    const fechaEntregaInput = document.getElementById('tarea-fin').value;
+    const fechaSeleccionada = new Date(fechaEntregaInput);
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    // VALIDACIÓN 1: No fechas pasadas
+    if (fechaSeleccionada < hoy) {
+        alert("❌ La fecha de entrega no puede ser anterior a la fecha actual.");
+        return; // Detiene la ejecución
+    }
+// VALIDACIÓN 2: Fecha de culminación coherente
+    if (!fechaEntregaInput) {
+        alert("❌ Debes seleccionar una fecha de entrega.");
+        return;
+    }
     const assignmentId = sessionStorage.getItem('active_assignment');
     
     const datosTarea = {
