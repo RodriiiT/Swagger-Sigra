@@ -537,26 +537,46 @@ lista.forEach(t => {
 async function eliminarTarea(id) {
     try {
         // 1. Verificación de entregas
-        const resCheck = await fetch(`${API_URL}/Submission/activities/${id}/submissions`);
+        const resCheck = await fetch(`${API_URL}/submissions/activities/${id}/submissions`);
         if (resCheck.ok) {
             const entregas = await resCheck.json();
             // Si el array existe y tiene elementos, MANDAMOS EL AVISO y cortamos
             if (entregas && entregas.length > 0) {
-                alert("⚠️ ALERTA: No se puede borrar esta tarea porque ya tiene entregas de alumnos registradas.");
+                showDeleteBlockedModal('No se puede eliminar esta actividad porque ya 1 o más estudiantes han subido su tarea para calificar.');
                 return; 
             }
         }
         // 2. Si pasó la validación, pedir confirmación
         if (!confirm('¿Estás seguro de que deseas eliminar esta actividad?')) return;
         const resDelete = await fetch(`${API_URL}/activities/delete/${id}`, { method: 'DELETE' });
+        const deleteData = await resDelete.json().catch(() => ({}));
         if (resDelete.ok) {
             alert("✅ Tarea eliminada correctamente.");
             cargarTareas();
+        } else {
+            const msg = deleteData.error || deleteData.message || 'No se pudo eliminar la actividad.';
+            if (/entregas|submis/i.test(msg)) {
+                showDeleteBlockedModal('No se puede eliminar esta actividad porque ya 1 o más estudiantes han subido su tarea para calificar.');
+                return;
+            }
+            alert("❌ Error: " + msg);
         }
     } catch (error) {
         console.error("Error al validar borrado:", error);
-        alert("Ocurrió un error al intentar verificar las entregas.");
+        showDeleteBlockedModal('Ocurrió un error al intentar verificar las entregas. Inténtalo de nuevo más tarde.');
     }
+}
+
+function showDeleteBlockedModal(message) {
+    const modal = document.getElementById('modal-delete-blocked');
+    const msg = document.getElementById('delete-blocked-message');
+    if (msg) msg.textContent = message || 'Esta actividad no se puede eliminar porque ya tiene entregas.';
+    if (modal) modal.style.display = 'flex';
+}
+
+function closeDeleteBlockedModal() {
+    const modal = document.getElementById('modal-delete-blocked');
+    if (modal) modal.style.display = 'none';
 }
 
 // --- FUNCIÓN PARA PREPARAR LA EDICIÓN ---
@@ -927,4 +947,6 @@ Object.assign(window, {
     updateCurrentCourseTitle
     ,
     renderCourseShortcuts
+    ,
+    closeDeleteBlockedModal
 });
