@@ -1,11 +1,14 @@
 const API_URL = 'https://sigra.irissoftware.lat/api';
 
+let currentSection = 'inicio';
+
 document.addEventListener('DOMContentLoaded', async () => {
     const user = JSON.parse(localStorage.getItem('sigra_user'));
     if (!user) {
         console.warn("Sin sesión activa.");
         return;
     }
+    setMinTaskDates();
     const activeId = user.user_id || user.id;
     // 1. Mostrar nombre en el Header
     const nameLabel = document.getElementById('prof-user-name');
@@ -18,9 +21,44 @@ document.addEventListener('DOMContentLoaded', async () => {
         formRecurso.addEventListener('submit', manejarSubidaRecurso);
     }
     // Cargar listado de cursos del profesor para la vista "Inicio" y mostrarla
-    cargarCursosProfesor();
+    await cargarCursosProfesor();
     showSection('inicio');
 });
+
+function setMinTaskDates() {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    const yyyy = hoy.getFullYear();
+    const mm = String(hoy.getMonth() + 1).padStart(2, '0');
+    const dd = String(hoy.getDate()).padStart(2, '0');
+    const minDate = `${yyyy}-${mm}-${dd}`;
+
+    const inicio = document.getElementById('tarea-inicio');
+    const fin = document.getElementById('tarea-fin');
+    if (inicio) inicio.min = minDate;
+    if (fin) fin.min = minDate;
+
+    const enforceMin = (input) => {
+        if (!input || !input.value) return;
+        if (input.min && input.value < input.min) {
+            input.value = input.min;
+        }
+    };
+
+    if (inicio && !inicio.dataset.boundMin) {
+        ['input', 'change', 'blur'].forEach(evt => {
+            inicio.addEventListener(evt, () => enforceMin(inicio));
+        });
+        inicio.dataset.boundMin = 'true';
+    }
+
+    if (fin && !fin.dataset.boundMin) {
+        ['input', 'change', 'blur'].forEach(evt => {
+            fin.addEventListener(evt, () => enforceMin(fin));
+        });
+        fin.dataset.boundMin = 'true';
+    }
+}
 
 function setActiveNav(sectionId) {
     const links = document.querySelectorAll('.nav-links a');
@@ -126,32 +164,89 @@ async function cargarCursosProfesor() {
         if (!currentActive && courses[0]?.assignment_id) {
             sessionStorage.setItem('active_assignment', String(courses[0].assignment_id));
         }
+        renderCourseSelect(courses);
         // Render cards with improved visuals
         cont.innerHTML = courses.map(c => {
-            const teacher = escapeHtml(c.teacher_name || '');
             const subject = escapeHtml(c.subject_name || 'Materia');
             const grade = escapeHtml(c.grade_name || '');
             const section = escapeHtml(c.section_name || '');
             const year = escapeHtml(c.name || c.academic_year || '');
+            const badgeText = `${grade}${section ? ` · Secc. ${section}` : ''}`.trim();
             return `
-            <div class="course-card" onclick="selectAssignment(${c.assignment_id})" tabindex="0" onkeydown="if(event.key==='Enter'){ selectAssignment(${c.assignment_id}); }" role="button" aria-pressed="false" style="border-radius:12px; overflow:hidden; background:linear-gradient(135deg, #ffffff 0%, #f7fbff 100%);">
-                <div class="course-card-content" style="padding:16px; display:flex; gap:12px; align-items:center;">
+            <div class="course-card" onclick="selectAssignment(${c.assignment_id})" tabindex="0" onkeydown="if(event.key==='Enter'){ selectAssignment(${c.assignment_id}); }" role="button" aria-pressed="false">
+                <div class="course-card-header">
                     <div class="course-avatar" aria-hidden="true">
                         ${subject.split(' ').map(s=>s[0]||'').slice(0,2).join('').toUpperCase()}
                     </div>
-                    <div style="flex:1;">
-                        <div class="course-title">${subject}</div>
-                        <div class="course-meta">${grade} • ${section} ${year ? '• ' + year : ''}</div>
+                    ${badgeText ? `<span class="course-badge">${badgeText}</span>` : ''}
+                </div>
+                <div class="course-card-content">
+                    <div class="course-title">${subject}</div>
+                    <div class="course-meta">
+                        ${year ? `<span class="course-year">${year}</span>` : ''}
                     </div>
-                    <div style="text-align:right; font-size:0.85rem; color:#777;">
-                        ${teacher ? `<div style="font-weight:600;">${teacher}</div>` : ''}
-                    </div>
+                </div>
+                <div class="course-card-footer">
+                    <span>Acceder al curso</span>
+                    <i class="fas fa-arrow-right"></i>
                 </div>
             </div>`;
         }).join('');
         return courses;
     } catch (err) {
         console.error('Error cargando cursos del profesor:', err);
+    }
+}
+
+function renderCourseSelect(courses = []) {
+    const select = document.getElementById('nav-course-select');
+    if (!select) return;
+    const active = sessionStorage.getItem('active_assignment') || '';
+    if (!courses.length) {
+        select.innerHTML = '<option value="">Sin cursos</option>';
+        select.disabled = true;
+        return;
+    }
+    select.disabled = false;
+    select.innerHTML = courses.map(c => {
+        const value = String(c.assignment_id || '');
+        const label = c.subject_name || c.subject || `Curso ${value}`;
+        return `<option value="${value}">${label}</option>`;
+    }).join('');
+    if (active) select.value = String(active);
+
+    if (!select.dataset.bound) {
+        select.addEventListener('change', () => {
+            const next = select.value;
+            if (!next) return;
+            sessionStorage.setItem('active_assignment', next);
+            updateCurrentCourseTitle(next);
+            renderCourseShortcuts(next);
+            refreshCurrentSection();
+        });
+        select.dataset.bound = 'true';
+    }
+}
+
+function refreshCurrentSection() {
+    if (currentSection === 'mi-curso') {
+        cargarMaterialApoyo();
+        return;
+    }
+    if (currentSection === 'alumnos') {
+        cargarListaAlumnos();
+        return;
+    }
+    if (currentSection === 'crear-tarea') {
+        cargarTareas();
+        return;
+    }
+    if (currentSection === 'tareas-recibidas') {
+        cargarEntregasParaCalificar();
+        return;
+    }
+    if (currentSection === 'asistencia') {
+        cargarTablaAsistencia();
     }
 }
 
@@ -173,6 +268,8 @@ async function ensureActiveAssignment() {
 function selectAssignment(assignmentId) {
     if (!assignmentId) return;
     sessionStorage.setItem('active_assignment', assignmentId);
+    const select = document.getElementById('nav-course-select');
+    if (select) select.value = String(assignmentId);
     // Actualizamos el título del curso seleccionado y cargamos las vistas relacionadas
     updateCurrentCourseTitle(assignmentId);
     renderCourseShortcuts(assignmentId);
@@ -560,6 +657,7 @@ async function showSection(sectionId) {
     if (target) {
         target.style.display = 'block';
         setActiveNav(sectionId);
+        currentSection = sectionId;
         if (['mi-curso', 'alumnos', 'crear-tarea', 'tareas-recibidas', 'asistencia'].includes(sectionId)) {
             await ensureActiveAssignment();
         }
@@ -568,6 +666,7 @@ async function showSection(sectionId) {
         if (sectionId === 'alumnos' || sectionId === 'asistencia') {
             cargarListaAlumnos();
         } else if (sectionId === 'crear-tarea') {
+            setMinTaskDates();
             cargarTareas(); 
         } else if (sectionId === 'tareas-recibidas') {
             cargarEntregasParaCalificar();
